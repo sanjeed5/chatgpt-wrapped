@@ -1,0 +1,19 @@
+# Sensitive data - never commit
+chatgpt-export/
+chatgpt-export.zip
+*.zip
+conversations.json
+user.json
+
+# Build artifacts
+node_modules/
+dist/
+.cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/

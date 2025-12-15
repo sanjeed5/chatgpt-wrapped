@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatGPT Wrapped 2025</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Upload Screen -->
+    <div id="upload-screen" class="screen active">
+      <div class="container">
+        <h1 class="logo">ChatGPT Wrapped <span class="year">2025</span></h1>
+        
+        <p class="tagline">See your year with AI — conversations, patterns, and more.</p>
+        
+        <!-- Step 1: Export Instructions -->
+        <div class="steps-card">
+          <p class="steps-title">Step 1: Export your ChatGPT data</p>
+          <ol class="steps-list">
+            <li>Go to <a href="https://chatgpt.com/#settings/DataControls" target="_blank">chatgpt.com → Settings → Data Controls</a></li>
+            <li>Click <strong>Export data</strong> → Confirm</li>
+            <li>Wait for the email <span class="step-note">(5-30 min)</span> — <a href="https://mail.google.com/mail/u/0/#advanced-search/from=noreply%40tm.openai.com&subject=ChatGPT+-+Your+data+export+is+ready&query=from%3A(noreply%40tm.openai.com)" target="_blank">Find it in Gmail</a></li>
+          </ol>
+        </div>
+        
+        <!-- Step 2: Upload -->
+        <div class="steps-card">
+          <p class="steps-title">Step 2: Upload it here</p>
+          <div class="dropzone" id="dropzone">
+            <p class="dropzone-text">Drop your export here</p>
+            <p class="dropzone-hint">or click to browse</p>
+          </div>
+          <p class="file-types">Accepts .zip or conversations.json</p>
+        </div>
+        
+        <input type="file" id="file-input" accept=".zip,.json" hidden>
+        
+        <div class="divider"><span>or</span></div>
+        
+        <button id="btn-demo" class="btn btn-secondary">See demo with sample data</button>
+        
+        <p class="privacy">🔒 100% private — runs entirely in your browser</p>
+      </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="screen">
+      <div class="container">
+        <div class="spinner"></div>
+        <p class="loading-text">Analyzing your conversations...</p>
+        <p class="loading-status" id="loading-status">Reading file...</p>
+      </div>
+    </div>
+
+    <!-- Error Screen -->
+    <div id="error-screen" class="screen">
+      <div class="container">
+        <p class="error-icon">😕</p>
+        <h2>Something went wrong</h2>
+        <p class="error-message" id="error-message">Could not parse the file.</p>
+        <button class="btn btn-primary" onclick="location.reload()">Try again</button>
+      </div>
+    </div>
+
+    <!-- Slides Screen -->
+    <div id="slides-screen" class="screen">
+      <div class="slides-container" id="slides-container"></div>
+      
+      <button class="btn-restart" id="btn-restart" title="Start over">&times;</button>
+      
+      <div class="click-zone left" id="prev-zone"></div>
+      <div class="click-zone right" id="next-zone"></div>
+      
+      <div class="nav-dots" id="nav-dots"></div>
+      
+      <div class="nav-arrows">
+        <button class="nav-arrow" id="btn-prev">←</button>
+        <button class="nav-arrow" id="btn-next">→</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/parser.js"></script>
+  <script src="js/stats.js"></script>
+  <script src="js/slides.js"></script>
+  <script src="js/demo-data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
