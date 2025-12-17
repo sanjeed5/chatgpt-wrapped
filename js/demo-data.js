@@ -141,6 +141,39 @@ const DemoData = {
     
     const year = 2025;
     
+    // Add first conversation of 2025 with no title (to test message extraction)
+    const firstConvo2025 = new Date(year, 0, 2, 10, 15); // Jan 2, 2025
+    conversations.push({
+      id: 'conv-2025-first',
+      title: '', // Empty title to test message extraction
+      create_time: firstConvo2025.getTime() / 1000,
+      update_time: firstConvo2025.getTime() / 1000 + 300,
+      default_model_slug: 'gpt-4o',
+      mapping: {
+        'msg-user-0': {
+          id: 'msg-user-0',
+          message: {
+            author: { role: 'user' },
+            content: {
+              content_type: 'text',
+              parts: ['How can I improve my productivity and focus in the new year?']
+            }
+          }
+        },
+        'msg-assistant-0': {
+          id: 'msg-assistant-0',
+          message: {
+            author: { role: 'assistant' },
+            content: {
+              content_type: 'text',
+              parts: ['Great question! Let me share some effective strategies for boosting productivity and maintaining focus throughout the year...']
+            }
+          }
+        }
+      }
+    });
+    convId++;
+    
     // January to current date (or December for demo)
     for (let month = 0; month < 12; month++) {
       // Varying activity per month (building up over year)
@@ -216,6 +249,69 @@ const DemoData = {
       update_time: longConvoDate.getTime() / 1000 + 7200,
       default_model_slug: 'gpt-4o',
       mapping: this.generateMapping(25, true) // 25 message pairs = 50 messages!
+    });
+    
+    // Add conversations with generic titles (to test message extraction)
+    const genericDate1 = new Date(year, 2, 10, 15, 20);
+    conversations.push({
+      id: 'conv-generic-1',
+      title: 'New chat',
+      create_time: genericDate1.getTime() / 1000,
+      update_time: genericDate1.getTime() / 1000 + 200,
+      default_model_slug: 'gpt-4o',
+      mapping: {
+        'msg-user-gen1': {
+          id: 'msg-user-gen1',
+          message: {
+            author: { role: 'user' },
+            content: {
+              content_type: 'text',
+              parts: ['What are some creative gift ideas for a tech-savvy friend?']
+            }
+          }
+        },
+        'msg-assistant-gen1': {
+          id: 'msg-assistant-gen1',
+          message: {
+            author: { role: 'assistant' },
+            content: {
+              content_type: 'text',
+              parts: ['I\'d be happy to suggest some creative tech gifts!']
+            }
+          }
+        }
+      }
+    });
+    
+    const genericDate2 = new Date(year, 5, 8, 9, 45);
+    conversations.push({
+      id: 'conv-generic-2',
+      title: 'Untitled',
+      create_time: genericDate2.getTime() / 1000,
+      update_time: genericDate2.getTime() / 1000 + 250,
+      default_model_slug: 'gpt-4o',
+      mapping: {
+        'msg-user-gen2': {
+          id: 'msg-user-gen2',
+          message: {
+            author: { role: 'user' },
+            content: {
+              content_type: 'text',
+              parts: ['Can you explain the difference between machine learning and deep learning in simple terms?']
+            }
+          }
+        },
+        'msg-assistant-gen2': {
+          id: 'msg-assistant-gen2',
+          message: {
+            author: { role: 'assistant' },
+            content: {
+              content_type: 'text',
+              parts: ['Great question! Let me break down the key differences...']
+            }
+          }
+        }
+      }
     });
     
     // Add some late night sessions (for night owl detection)

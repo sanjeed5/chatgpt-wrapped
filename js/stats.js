@@ -89,7 +89,7 @@ const Stats = {
     const firstConvoDate = firstConvoOfYear 
       ? new Date(firstConvoOfYear.create_time * 1000) 
       : null;
-    const firstConvoTitle = firstConvoOfYear?.title || 'Untitled';
+    const firstConvoTitle = firstConvoOfYear ? this.getConversationTitle(firstConvoOfYear) : 'Untitled';
     
     // Biggest month
     const monthlyActivity = this.getMonthlyActivity(targetYearConvos, targetYear);
@@ -117,7 +117,7 @@ const Stats = {
         firstDate: firstDate ? this.formatDate(firstDate) : null,
         firstDateShort: firstDate ? this.formatDateShort(firstDate) : null,
         firstYear: firstDate ? firstDate.getFullYear() : null,
-        firstConvoTitle: this.truncateTitle(firstConvo?.title || 'Untitled'),
+        firstConvoTitle: firstConvo ? this.getConversationTitle(firstConvo) : 'Untitled',
         daysSinceFirst,
         byYear: Object.fromEntries(
           Object.entries(convosByYear).map(([year, convos]) => [year, convos.length])
@@ -155,11 +155,11 @@ const Stats = {
       tweetsEquivalent,
       firstConvoDate: firstConvoDate ? this.formatDate(firstConvoDate) : null,
       firstConvoDateShort: firstConvoDate ? this.formatDateShort(firstConvoDate) : null,
-      firstConvoTitle: this.truncateTitle(firstConvoTitle),
+      firstConvoTitle: firstConvoTitle,
       biggestMonth,
       monthlyActivity,
       longestConvo: longestConvo ? {
-        title: this.truncateTitle(longestConvo.title || 'Untitled'),
+        title: this.getConversationTitle(longestConvo),
         messageCount: longestConvo.messageCount,
         wordCount: longestConvo.wordCount
       } : null,
@@ -503,7 +503,8 @@ const Stats = {
     if (avgWordsPerConvo < 50 && totalConvos > 100) {
       return { 
         type: '💬 THE QUICK ASKER', 
-        description: 'Short, sharp, to the point. You know what you want and you get straight to it.',
+        description: 'Short, sharp, to the point.',
+        reason: `You keep it brief with ${Math.round(avgWordsPerConvo)} words per chat on average.`,
         emoji: '💬',
         archetype: 'Quick Asker'
       };
@@ -513,7 +514,8 @@ const Stats = {
     if (primaryTheme === 'coding' && totalConvos > 100) {
       return { 
         type: '💻 THE DEVELOPER', 
-        description: 'Code is your language, AI is your pair programmer. Together, you build.',
+        description: 'Code is your language, AI is your pair programmer.',
+        reason: 'Your conversations are dominated by code and technical problem solving.',
         emoji: '💻',
         archetype: 'Developer'
       };
@@ -522,7 +524,8 @@ const Stats = {
     if (primaryTheme === 'creative' && totalConvos > 80) {
       return { 
         type: '🎨 THE CREATOR', 
-        description: 'Ideas flow through you like water. ChatGPT is your creative partner in crime.',
+        description: 'Ideas flow through you like water.',
+        reason: 'You use AI for brainstorming, writing, and creative exploration.',
         emoji: '🎨',
         archetype: 'Creator'
       };
@@ -531,7 +534,8 @@ const Stats = {
     if (primaryTheme === 'learning' && activeDaysPct > 50) {
       return { 
         type: '📚 THE STUDENT', 
-        description: 'Every conversation is a lesson. You\'re here to learn, grow, and understand.',
+        description: 'Every conversation is a lesson.',
+        reason: 'You show up consistently to learn new things, with high daily activity.',
         emoji: '📚',
         archetype: 'Student'
       };
@@ -540,7 +544,8 @@ const Stats = {
     if (primaryTheme === 'work' && totalConvos > 150) {
       return { 
         type: '💼 THE PROFESSIONAL', 
-        description: 'Business minded. Results driven. AI is your secret weapon at work.',
+        description: 'Business minded. Results driven.',
+        reason: 'Your usage patterns align with professional productivity and work hours.',
         emoji: '💼',
         archetype: 'Professional'
       };
@@ -550,7 +555,8 @@ const Stats = {
     if (totalConvos > 300) {
       return { 
         type: '🎯 THE ENTHUSIAST', 
-        description: 'You\'ve fully embraced AI as part of your workflow. Every question deserves an answer.',
+        description: 'You\'ve fully embraced AI as part of your workflow.',
+        reason: `With ${totalConvos} conversations, you're in the top tier of users.`,
         emoji: '🎯',
         archetype: 'Enthusiast'
       };
@@ -559,7 +565,8 @@ const Stats = {
     if (activeDaysPct > 40) {
       return { 
         type: '📅 THE REGULAR', 
-        description: 'ChatGPT has become a reliable part of your routine. Steady and consistent.',
+        description: 'ChatGPT has become a reliable part of your routine.',
+        reason: `You used ChatGPT on ${activeDaysPct}% of days this year.`,
         emoji: '📅',
         archetype: 'Regular'
       };
@@ -568,7 +575,8 @@ const Stats = {
     if (totalConvos > 100) {
       return { 
         type: '🔍 THE EXPLORER', 
-        description: 'You use AI when inspiration strikes. Quality over quantity, always curious.',
+        description: 'You use AI when inspiration strikes.',
+        reason: 'You have a healthy number of conversations across various topics.',
         emoji: '🔍',
         archetype: 'Explorer'
       };
@@ -577,7 +585,8 @@ const Stats = {
     if (activeDays < 10 && totalConvos > 30) {
       return { 
         type: '🌊 THE BINGE USER', 
-        description: 'You disappear for weeks, then return with a vengeance. When you\'re here, you\'re ALL IN.',
+        description: 'You disappear for weeks, then return with a vengeance.',
+        reason: 'You have intense bursts of activity followed by silence.',
         emoji: '🌊',
         archetype: 'Binge User'
       };
@@ -586,7 +595,8 @@ const Stats = {
     // 6. Default archetypes
     return { 
       type: '✨ THE CURIOUS', 
-      description: 'You\'ve dipped your toes into the AI waters. Every journey starts somewhere.',
+      description: 'You\'ve dipped your toes into the AI waters.',
+      reason: 'You are just starting your journey with AI.',
       emoji: '✨',
       archetype: 'Curious'
     };
@@ -650,44 +660,44 @@ const Stats = {
     const roasts = [];
     
     // Extreme usage
-    if (hours > 500) roasts.push({ weight: 100, text: "At this point, ChatGPT should be claiming YOU as a dependent." });
-    if (hours > 300) roasts.push({ weight: 90, text: "You've spent more time with AI than most people spend with their families." });
-    if (hours > 200) roasts.push({ weight: 80, text: "Touch grass? You need to touch REALITY." });
+    if (hours > 500) roasts.push({ weight: 100, text: "At this point, ChatGPT should be claiming YOU as a dependent.", reason: "You spent over 500 hours with AI." });
+    if (hours > 300) roasts.push({ weight: 90, text: "You've spent more time with AI than most people spend with their families.", reason: "Over 300 hours logged this year." });
+    if (hours > 200) roasts.push({ weight: 80, text: "Touch grass? You need to touch REALITY.", reason: "Seriously, 200+ hours is a lot." });
     
     // Night owl
-    if (peakHour >= 0 && peakHour < 4) roasts.push({ weight: 75, text: "3 AM chats with an AI. Your therapist would have questions." });
-    if (peakHour >= 4 && peakHour < 6) roasts.push({ weight: 70, text: "Either you're an early bird or you never went to sleep. I'm betting on the latter." });
+    if (peakHour >= 0 && peakHour < 4) roasts.push({ weight: 75, text: "3 AM chats with an AI. Your therapist would have questions.", reason: "Your peak activity is in the dead of night." });
+    if (peakHour >= 4 && peakHour < 6) roasts.push({ weight: 70, text: "Either you're an early bird or you never went to sleep. I'm betting on the latter.", reason: "Active between 4 AM and 6 AM." });
     
     // Politeness extremes
-    if (politeness > 2) roasts.push({ weight: 65, text: "You say 'please' to a machine. The robots will spare you." });
-    if (politeness < 0.1 && conversations > 50) roasts.push({ weight: 65, text: "Not a single 'please' or 'thank you'? The AI uprising starts with you." });
+    if (politeness > 2) roasts.push({ weight: 65, text: "You say 'please' to a machine. The robots will spare you.", reason: "You are exceptionally polite to the AI." });
+    if (politeness < 0.1 && conversations > 50) roasts.push({ weight: 65, text: "Not a single 'please' or 'thank you'? The AI uprising starts with you.", reason: "Zero manners detected." });
     
     // Streak
-    if (longestStreak > 60) roasts.push({ weight: 60, text: `${longestStreak} days straight? That's not a habit, that's a lifestyle.` });
-    if (longestStreak > 30) roasts.push({ weight: 50, text: "Your longest streak is longer than most New Year's resolutions." });
+    if (longestStreak > 60) roasts.push({ weight: 60, text: `${longestStreak} days straight? That's not a habit, that's a lifestyle.`, reason: "You maintained a 2-month streak." });
+    if (longestStreak > 30) roasts.push({ weight: 50, text: "Your longest streak is longer than most New Year's resolutions.", reason: `A ${longestStreak}-day streak is impressive.` });
     
     // Word count
-    if (wordsTyped > 500000) roasts.push({ weight: 85, text: "You wrote half a million words to an AI. You could've written a novel. Several, actually." });
-    if (wordsTyped > 200000) roasts.push({ weight: 55, text: "You've written more to ChatGPT than most authors write in a year." });
+    if (wordsTyped > 500000) roasts.push({ weight: 85, text: "You wrote half a million words to an AI. You could've written a novel. Several, actually.", reason: "500k+ words typed. Wow." });
+    if (wordsTyped > 200000) roasts.push({ weight: 55, text: "You've written more to ChatGPT than most authors write in a year.", reason: "Over 200,000 words typed." });
     
     // Talk ratio
-    if (talkRatio > 20) roasts.push({ weight: 45, text: "You type 1 word, expect 20 back. Peak efficiency or peak laziness?" });
-    if (talkRatio < 2) roasts.push({ weight: 40, text: "You write essays, it gives you sentences. Who's the AI here?" });
+    if (talkRatio > 20) roasts.push({ weight: 45, text: "You type 1 word, expect 20 back. Peak efficiency or peak laziness?", reason: "Your input vs. output ratio is huge." });
+    if (talkRatio < 2) roasts.push({ weight: 40, text: "You write essays, it gives you sentences. Who's the AI here?", reason: "You type more than the AI does." });
     
     // Activity
-    if (activeDaysPct > 80) roasts.push({ weight: 70, text: "You used ChatGPT 80% of the year. The other 20%? Probably just server outages." });
-    if (activeDaysPct < 10 && conversations > 20) roasts.push({ weight: 35, text: "Binge user detected. You disappear for weeks then go absolutely feral." });
+    if (activeDaysPct > 80) roasts.push({ weight: 70, text: "You used ChatGPT 80% of the year. The other 20%? Probably just server outages.", reason: "You are active almost every single day." });
+    if (activeDaysPct < 10 && conversations > 20) roasts.push({ weight: 35, text: "Binge user detected. You disappear for weeks then go absolutely feral.", reason: "Sporadic but intense usage." });
     
     // Low usage - make these friendlier
-    if (hours < 2 && conversations > 0) roasts.push({ weight: 30, text: "Quality over quantity. You're selective about your AI time." });
-    if (conversations < 10 && conversations > 0) roasts.push({ weight: 25, text: "Starting strong! Every journey begins with a few conversations." });
+    if (hours < 2 && conversations > 0) roasts.push({ weight: 30, text: "Quality over quantity. You're selective about your AI time.", reason: "Low total hours but consistent usage." });
+    if (conversations < 10 && conversations > 0) roasts.push({ weight: 25, text: "Starting strong! Every journey begins with a few conversations.", reason: "You are just getting started." });
     
     // Default - make it positive
-    roasts.push({ weight: 10, text: "You use AI like a tool, not a crutch. Respect." });
+    roasts.push({ weight: 10, text: "You use AI like a tool, not a crutch. Respect.", reason: "Balanced and healthy usage patterns." });
     
     // Pick the highest weighted roast
     roasts.sort((a, b) => b.weight - a.weight);
-    return roasts[0].text;
+    return roasts[0]; // Returns object { text, reason, weight }
   },
 
   getMonthlyActivity(conversations, year) {
@@ -750,15 +760,85 @@ const Stats = {
     return longest;
   },
 
+  /**
+   * Extract first user message from a conversation
+   */
+  getFirstUserMessage(conversation) {
+    if (!conversation || !conversation.mapping) return null;
+    
+    const mapping = conversation.mapping;
+    
+    // Try to find messages in order
+    for (const msgData of Object.values(mapping)) {
+      const msg = msgData.message;
+      if (!msg) continue;
+      
+      // Look for user messages
+      if (msg.author?.role === 'user' && msg.content?.parts) {
+        const text = msg.content.parts
+          .filter(part => typeof part === 'string')
+          .join(' ')
+          .trim();
+        
+        if (text.length > 0) {
+          return text;
+        }
+      }
+    }
+    
+    return null;
+  },
+
+  /**
+   * Get a display title for a conversation
+   * Falls back to first user message if title is generic/empty
+   */
+  getConversationTitle(conversation, maxLength = 60) {
+    const title = conversation?.title;
+    
+    // Check if title is empty or generic
+    const isGeneric = !title || 
+                     typeof title !== 'string' || 
+                     title.trim() === '' || 
+                     title.toLowerCase() === 'new chat' || 
+                     title.toLowerCase() === 'untitled';
+    
+    if (isGeneric) {
+      // Try to get first user message
+      const firstMessage = this.getFirstUserMessage(conversation);
+      if (firstMessage) {
+        // Truncate if needed
+        if (firstMessage.length > maxLength) {
+          return firstMessage.substring(0, maxLength - 3) + '...';
+        }
+        return firstMessage;
+      }
+      // Final fallback
+      return 'A conversation with ChatGPT';
+    }
+    
+    // Use actual title, truncated if needed
+    const trimmed = title.trim();
+    if (trimmed.length > maxLength) {
+      return trimmed.substring(0, maxLength - 3) + '...';
+    }
+    return trimmed;
+  },
+
   truncateTitle(title, maxLength = 60) {
-    // Handle empty or very short titles
-    if (!title || title.trim() === '' || title === 'New chat') return 'Untitled';
-    if (title.length > maxLength) return title.substring(0, maxLength - 3) + '...';
-    return title;
+    // Legacy function - now just handles raw title strings
+    if (!title || typeof title !== 'string' || title.trim() === '') {
+      return 'A conversation with ChatGPT';
+    }
+    const trimmed = title.trim();
+    if (trimmed.length > maxLength) return trimmed.substring(0, maxLength - 3) + '...';
+    return trimmed;
   },
 
   formatDateShort(date) {
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    // Returns "Jan 2" style explicitly
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${months[date.getMonth()]} ${date.getDate()}`;
   },
 
   formatDate(date) {

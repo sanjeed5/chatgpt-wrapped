@@ -81,6 +81,16 @@ const App = {
     this.dom.btnDemo.addEventListener('click', () => this.loadDemo());
 
     // Drag & Drop
+    this.dom.dropZone.addEventListener('click', (e) => {
+      if (e.target.closest('button') || e.target.closest('a')) return;
+      this.dom.fileInput.click();
+    });
+    this.dom.dropZone.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+        e.preventDefault();
+        this.dom.fileInput.click();
+      }
+    });
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
       this.dom.dropZone.addEventListener(eventName, (e) => {
         e.preventDefault();
@@ -106,6 +116,8 @@ const App = {
         this.replayStory();
       } else if (e.target.id === 'btn-error-back') {
         this.goToSlide(0);
+      } else if (e.target.id === 'btn-get-wrapped') {
+        this.goToSlide(0);
       }
     });
   },
@@ -124,7 +136,10 @@ const App = {
     }
     
     try {
-      const conversations = await Parser.parse(file, () => {});
+      const minLoadingTime = new Promise(resolve => setTimeout(resolve, 1500));
+      const parsePromise = Parser.parse(file, () => {});
+      
+      const [_, conversations] = await Promise.all([minLoadingTime, parsePromise]);
       this.processData(conversations);
     } catch (err) {
       this.showError(err.message);
@@ -147,7 +162,20 @@ const App = {
   processData(conversations) {
     try {
       this.stats = Stats.compute(conversations, 2025);
-      this.generateSlides(this.stats);
+      
+      // Generate slides using external module
+      const { summarySlide } = SlideGenerator.generate(this.stats, this.dom.dynamicSlidesContainer);
+      
+      // Handle Demo Mode state in Summary
+      if (this.isDemo && summarySlide) {
+        const sharePrompt = summarySlide.querySelector('#share-prompt');
+        const actionsRow = summarySlide.querySelector('#actions-row');
+        const btnGet = summarySlide.querySelector('#btn-get-wrapped');
+        
+        if (sharePrompt) sharePrompt.style.display = 'none';
+        if (actionsRow) actionsRow.style.display = 'none';
+        if (btnGet) btnGet.style.display = 'block';
+      }
       
       // Update slides array with new dynamic slides
       this.slides = Array.from(document.querySelectorAll('.slide'));
@@ -158,160 +186,6 @@ const App = {
     } catch (err) {
       this.showError('Error processing stats: ' + err.message);
     }
-  },
-
-  generateSlides(stats) {
-    const container = this.dom.dynamicSlidesContainer;
-    container.innerHTML = ''; // Clear
-
-    // Helper to fill template
-    const createSlide = (tplId, dataFn) => {
-      const tpl = document.getElementById(tplId);
-      const clone = tpl.content.cloneNode(true);
-      const slide = clone.querySelector('.slide');
-      
-      // Fill data
-      const hooks = slide.querySelectorAll('[data-hook]');
-      hooks.forEach(el => {
-        const key = el.dataset.hook;
-        if (dataFn[key]) el.textContent = dataFn[key];
-      });
-
-      container.appendChild(slide);
-      return slide;
-    };
-
-    // NEW FLOW - Streamlined and Impactful
-    
-    // 1. Journey (When it all began)
-    if (stats.allTime && stats.allTime.firstDate) {
-      createSlide('tpl-slide-journey', {
-        'first-date-short': stats.allTime.firstDateShort,
-        'first-year': stats.allTime.firstYear,
-        'days-since': `${stats.allTime.daysSinceFirst} days ago`,
-        'first-title': stats.allTime.firstConvoTitle
-      });
-    }
-    
-    // 2. Intro (2025 overview) - with confetti!
-    const introSlide = createSlide('tpl-slide-intro', {
-      'total-convos': stats.conversations,
-      'active-days': stats.activeDays
-    });
-    
-    // Add animation data attribute
-    const introStatHuge = introSlide.querySelector('.stat-huge');
-    if (introStatHuge) introStatHuge.setAttribute('data-animate', 'true');
-
-    // 3. YoY Growth
-    if (stats.yoyGrowth && stats.previousYearConversations > 0) {
-      const growthMultiple = stats.yoyGrowth >= 1 
-        ? `${stats.yoyGrowth.toFixed(1)}x`
-        : `${Math.round(stats.yoyGrowth * 100)}%`;
-      
-      let message = "You're locked in.";
-      if (stats.yoyGrowth >= 3) message = "That's exponential growth.";
-      else if (stats.yoyGrowth >= 2) message = "You're all in.";
-      else if (stats.yoyGrowth >= 1.5) message = "You're hooked.";
-      else if (stats.yoyGrowth < 1) message = 'Quality over quantity.';
-      
-      createSlide('tpl-slide-growth', {
-        'growth-multiple': growthMultiple,
-        'this-year': stats.conversations,
-        'last-year': stats.previousYearConversations,
-        'growth-message': message
-      });
-    }
-
-    // 4. Biggest Month
-    if (stats.biggestMonth) {
-      createSlide('tpl-slide-biggest-month', {
-        'biggest-month': stats.biggestMonth.month,
-        'month-count': stats.biggestMonth.count
-      });
-    }
-
-    // 5. Longest Streak
-    if (stats.longestStreak > 0) {
-      createSlide('tpl-slide-streak', {
-        'streak-days': stats.longestStreak
-      });
-    }
-
-    // 6. Peak Time (with real chart data)
-    const peakSlide = createSlide('tpl-slide-peak', {
-      'peak-day': stats.peakDay,
-      'peak-time': stats.peakHour
-    });
-    
-    // Populate day chart with real data
-    if (stats.peakDayDistribution) {
-      const chartContainer = peakSlide.querySelector('[data-hook="day-chart"]');
-      const days = ['Sundays', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays'];
-      const counts = days.map(day => stats.peakDayDistribution[day] || 0);
-      const maxCount = Math.max(...counts, 1);
-      
-      days.forEach((day, idx) => {
-        const bar = document.createElement('div');
-        bar.className = 'bar';
-        if (day === stats.peakDay) bar.classList.add('active');
-        const height = Math.max((counts[idx] / maxCount) * 100, 5); // Min 5% for visibility
-        bar.style.height = `${height}%`;
-        chartContainer.appendChild(bar);
-      });
-    }
-
-    // 7. Persona
-    const personaData = {
-      'persona-type': stats.personality.type,
-      'persona-desc': stats.personality.description,
-      'top-model': stats.topModel
-    };
-    
-    if (stats.personality.emoji) {
-      personaData['persona-emoji'] = stats.personality.emoji;
-    }
-    
-    createSlide('tpl-slide-persona', personaData);
-
-    // 8. Words
-    const wordsSlide = document.getElementById('tpl-slide-words').content.cloneNode(true);
-    const slide = wordsSlide.querySelector('.slide');
-    
-    slide.querySelector('[data-hook="words-user"]').textContent = stats.wordsTypedFormatted;
-    
-    const booksWritten = stats.booksWritten || stats.novelsEquivalent;
-    const comparisonEl = slide.querySelector('[data-hook="books-comparison"]');
-    
-    if (booksWritten > 0) {
-      slide.querySelector('[data-hook="books-written"]').textContent = booksWritten;
-    } else {
-      comparisonEl.textContent = 'Every word counts. ';
-      const highlight = document.createElement('span');
-      highlight.className = 'highlight';
-      highlight.textContent = 'You\'re building something.';
-      comparisonEl.appendChild(highlight);
-    }
-    
-    container.appendChild(slide);
-
-    // 9. Roast
-    createSlide('tpl-slide-roast', {
-      'roast-text': stats.roast
-    });
-
-    // 10. Summary
-    const summaryPersona = stats.personality.archetype || stats.personality.type;
-    createSlide('tpl-slide-summary', {
-      'total-convos': stats.conversations,
-      'active-days': stats.activeDays,
-      'total-hours': stats.totalHours,
-      'words-short': stats.wordsTypedFormatted,
-      'persona-type': summaryPersona
-    });
-
-    // Action buttons are now separate (btn-download, btn-share-x, btn-replay)
-    // No need to configure anything here anymore
   },
 
   // --- NAVIGATION & ANIMATION ---

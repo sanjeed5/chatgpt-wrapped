@@ -29,7 +29,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/slides.css">
 </head>
 <body>
   <!-- Skip to content for screen readers -->
@@ -55,28 +57,41 @@
     <!-- 1. UPLOAD SLIDE -->
     <section class="slide active" id="slide-upload">
       <div class="slide-content">
-        <div class="logo-pill">ChatGPT Wrapped</div>
+
         
         <div class="hero-text-group">
+          <div class="brand-title">ChatGPT Wrapped</div>
           <h1 class="title-huge">2025</h1>
           <p class="subtitle">See your AI story unfold.</p>
         </div>
 
-        <div class="upload-area" id="drop-zone">
-          <div class="icon">📁</div>
-          <p class="upload-instruction">Drop <strong>conversations.json</strong> or <strong>.zip</strong></p>
-          <p class="upload-hint">Export from ChatGPT: Settings → Data controls → Export</p>
-          <button id="btn-select" class="btn-primary">Select File</button>
-          <button id="btn-demo" class="btn-secondary-alt">Try Demo</button>
-          <input type="file" id="file-input" hidden accept=".json,.zip">
+        <div class="upload-area" id="drop-zone" role="button" tabindex="0" aria-label="Upload conversations file" aria-describedby="upload-instruction upload-hint">
+          <div class="icon" aria-hidden="true">📁</div>
+          <p class="upload-instruction" id="upload-instruction">Drop <strong>conversations.json</strong> or <strong>.zip</strong></p>
+          
+          <div class="upload-hint-container">
+            <p class="upload-hint" id="upload-hint">
+              1. <a href="https://chatgpt.com/#settings/DataControls" target="_blank" class="link-subtle">Export data</a> &nbsp;
+              2. <a href="https://mail.google.com/mail/u/0/#advanced-search/from=noreply%40tm.openai.com&subject=ChatGPT+-+Your+data+export+is+ready&sizeoperator=s_sl&sizeunit=s_smb&query=from%3A(noreply%40tm.openai.com)" target="_blank" class="link-subtle">Check email</a>
+            </p>
+          </div>
+
+          <button id="btn-select" class="btn-primary" type="button">Select File</button>
+          <button id="btn-demo" class="btn-secondary-alt" type="button">Try Demo</button>
+          <input type="file" id="file-input" hidden accept=".json,.zip" aria-describedby="upload-instruction upload-hint">
         </div>
         
         <div class="privacy-badge">
           <span class="privacy-icon">🔒</span>
           <div class="privacy-text">
             <strong>100% Private</strong>
-            <span>All processing happens in your browser. Your data never leaves your device.</span>
+            <span>All processing happens in your browser.</span>
           </div>
+        </div>
+
+        <div class="slide-footer">
+          <p>Not affiliated with OpenAI</p>
+          <p>Made by <a href="https://x.com/sanjeed_i" target="_blank">Sanjeed</a></p>
         </div>
       </div>
     </section>
@@ -96,7 +111,7 @@
         <div class="error-icon">⚠️</div>
         <h2 class="error-title">Oops!</h2>
         <p class="error-message" id="error-message">Something went wrong.</p>
-        <button id="btn-error-back" class="btn-primary" style="margin-top: 3vh;">Try Again</button>
+        <button id="btn-error-back" class="btn-primary">Try Again</button>
       </div>
     </section>
 
@@ -110,12 +125,11 @@
     <section class="slide slide-dark">
       <div class="slide-content centered">
         <p class="eyebrow">The Beginning</p>
-        <h2 class="title-md" style="font-size: 7cqw; margin-bottom: 5vh">Your AI journey began</h2>
+        <h2 class="title-md title-journey-start">Your AI journey began</h2>
         
         <div class="date-display">
-          <div class="journey-date-wrapper">
-            <div class="journey-date" data-hook="first-date-short">Jan 2</div>
-            <div class="journey-year" data-hook="first-year">2023</div>
+          <div class="journey-date-combined">
+            <span class="journey-full-date" data-hook="first-date-full">Jan 2, 2023</span>
           </div>
           <p class="journey-days-text" data-hook="days-since">0 days ago</p>
         </div>
@@ -129,45 +143,61 @@
   </template>
 
   <template id="tpl-slide-intro">
-    <section class="slide slide-gradient-1">
+    <section class="slide slide-gradient-1 slide-overview">
       <div class="slide-content centered">
-        <p class="eyebrow">The Overview</p>
-        <h1 class="stat-huge" data-animate>2025</h1>
-        <p class="stat-desc">You really went for it.</p>
+        <p class="eyebrow fade-in-up">The Overview</p>
+        <h1 class="stat-huge fade-in-up delay-1" data-animate>2025</h1>
+        <p class="stat-desc fade-in-up delay-2" data-hook="intro-desc">You really went for it.</p>
+        <p class="stat-sub fade-in-up delay-2">Here is the raw data:</p>
         
-        <div class="stats-row">
+        <div class="stats-row fade-in-up delay-3">
           <div class="stat-box">
+            <span class="overview-icon">💬</span>
             <span class="val" data-hook="total-convos">0</span>
             <span class="lbl">Conversations</span>
           </div>
           <div class="stat-box">
+            <span class="overview-icon">📅</span>
             <span class="val" data-hook="active-days">0</span>
             <span class="lbl">Active Days</span>
+          </div>
+          <div class="stat-box">
+            <span class="overview-icon">⏱️</span>
+            <span class="val" data-hook="total-hours">0</span>
+            <span class="lbl">Hours Spent</span>
           </div>
         </div>
       </div>
     </section>
   </template>
   
+  <!-- ... growth, peak, streak ... -->
+
+  
   <template id="tpl-slide-growth">
-    <section class="slide slide-gradient-2">
+    <section class="slide slide-gradient-2 slide-growth">
       <div class="slide-content centered">
         <p class="eyebrow">Year Over Year</p>
         <h1 class="stat-huge text-gradient" data-hook="growth-multiple">2.3x</h1>
-        <p class="stat-label">more than last year</p>
+        <p class="stat-label" data-hook="growth-label">more than last year</p>
         
-        <div class="stats-row" style="margin-top: 6vh">
-          <div class="stat-box">
-            <span class="val" data-hook="this-year">0</span>
-            <span class="lbl">2025</span>
-          </div>
-          <div class="stat-box">
+        <!-- Graph Container -->
+        <div class="growth-graph-container" id="growth-graph-container">
+           <!-- CSS Bars injected by JS -->
+        </div>
+
+        <div class="stats-row growth-stats-row">
+          <div class="stat-box growth-box-2024">
             <span class="val" data-hook="last-year">0</span>
             <span class="lbl">2024</span>
           </div>
+          <div class="stat-box growth-box-2025">
+            <span class="val" data-hook="this-year">0</span>
+            <span class="lbl">2025</span>
+          </div>
         </div>
         
-        <p class="stat-desc" style="margin-top: 5vh" data-hook="growth-message">You're locked in.</p>
+        <p class="stat-desc growth-desc" data-hook="growth-message">You're locked in.</p>
       </div>
     </section>
   </template>
@@ -195,11 +225,30 @@
       <div class="slide-content centered">
         <p class="eyebrow">Consistency</p>
         <h1 class="stat-huge" data-hook="streak-days">14</h1>
-        <p class="stat-label">days straight</p>
+        <p class="stat-label" data-hook="streak-label">days straight</p>
         
-        <div class="streak-fire">🔥</div>
+        <div class="streak-heatmap-container" id="streak-heatmap">
+          <!-- Heatmap grid injected by JS -->
+        </div>
+        <p class="heatmap-label">Activity: Last 90 Days</p>
         
-        <p class="stat-desc" style="margin-top: 5vh">Your longest streak. You showed up.</p>
+        <p class="stat-desc streak-desc">Your longest streak. You showed up.</p>
+      </div>
+    </section>
+  </template>
+
+  <template id="tpl-slide-model">
+    <section class="slide slide-dark">
+      <div class="slide-content centered">
+        <p class="eyebrow">The Tool</p>
+        <h2 class="title-md">Your Go-To Model</h2>
+        
+        <div class="model-display">
+          <div class="model-icon">🤖</div>
+          <h1 class="stat-huge text-gradient" data-hook="top-model">GPT-4</h1>
+        </div>
+        
+        <p class="stat-desc">You know what you like.</p>
       </div>
     </section>
   </template>
@@ -211,10 +260,7 @@
         <p class="eyebrow">Your Archetype</p>
         <h1 class="persona-name" data-hook="persona-type">The Explorer</h1>
         <p class="persona-text" data-hook="persona-desc">You use AI when inspiration strikes. Quality over quantity.</p>
-        
-        <div class="badge-model">
-          Favorite: <span data-hook="top-model">GPT-4</span>
-        </div>
+        <!-- Reason injected via JS -->
       </div>
     </section>
   </template>
@@ -237,14 +283,14 @@
     <section class="slide slide-gradient-1">
       <div class="slide-content centered">
         <p class="eyebrow">Peak Performance</p>
-        <h2 class="title-md">Your busiest month?</h2>
+        <h2 class="title-md">Your busiest month</h2>
         
         <div class="month-display">
           <div class="month-name" data-hook="biggest-month">March</div>
           <div class="month-count"><span data-hook="month-count">0</span> conversations</div>
         </div>
         
-        <p class="stat-desc" style="margin-top: 5vh">You were on fire 🔥</p>
+        <p class="stat-desc month-desc" data-hook="month-desc">You were on fire 🔥</p>
       </div>
     </section>
   </template>
@@ -254,7 +300,7 @@
     <section class="slide slide-dark">
       <div class="slide-content centered">
         <p class="eyebrow">The Reality Check</p>
-        <h1 class="title-md" style="font-size: 7cqw; line-height: 1.5; max-width: 90%" data-hook="roast-text">You are disappointingly normal.</h1>
+        <h1 class="title-md roast-text" data-hook="roast-text">You are disappointingly normal.</h1>
       </div>
     </section>
   </template>
@@ -297,12 +343,16 @@
           <div class="card-footer">chatgpt-wrapped.com</div>
         </div>
         
-        <p class="share-prompt">Save and share your story</p>
-        <div class="actions-row">
+        <p class="share-prompt" id="share-prompt">Save and share your story</p>
+        <div class="actions-row" id="actions-row">
           <button id="btn-download" class="btn-primary">Download Image</button>
           <button id="btn-share-x" class="btn-secondary">Share on 𝕏</button>
         </div>
-        <button id="btn-replay" class="btn-text" style="margin-top: 2vh;">↻ Replay</button>
+        
+        <!-- Demo CTA (Hidden by default) -->
+        <button id="btn-get-wrapped" class="btn-primary" style="display: none;">Get Your Wrapped</button>
+
+        <button id="btn-replay" class="btn-text btn-replay-custom">↻ Replay</button>
       </div>
     </section>
   </template>
@@ -311,6 +361,7 @@
   <script src="js/stats.js"></script>
   <script src="js/demo-data.js"></script>
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <script src="js/slides.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

@@ -1,0 +1,206 @@
+/* UI Components */
+
+/* PROGRESS BARS */
+.progress-container {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  height: 4px;
+  z-index: 100;
+  display: flex;
+  gap: 4px;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 100%;
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: white;
+  width: 0%;
+  transition: width 0.1s linear;
+}
+
+/* NAVIGATION ZONES */
+.tap-zone {
+  position: absolute;
+  top: 50px;
+  bottom: 0;
+  z-index: 50;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+.tap-zone.left { left: 0; width: 30%; }
+.tap-zone.right { right: 0; width: 70%; }
+
+/* BUTTONS */
+.btn-primary {
+  background: white;
+  color: black;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 4cqw;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 10px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255,255,255,0.3);
+}
+
+.btn-primary:active { transform: translateY(0); }
+
+.btn-secondary {
+  background: #000;
+  color: white;
+  border: 2px solid white;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 4cqw;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 10px;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #1a1a1a;
+  transform: translateY(-2px);
+}
+
+.btn-text {
+  background: transparent;
+  border: none;
+  color: var(--text-grey);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 3.5cqw;
+}
+
+.btn-secondary-alt {
+  background: rgba(255,255,255,0.05);
+  color: white;
+  border: 1px solid #333;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 4cqw;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 10px;
+  transition: all 0.2s;
+}
+
+.btn-secondary-alt:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: #555;
+  transform: translateY(-1px);
+}
+
+#btn-error-back { margin-top: 3vh; }
+.btn-replay-custom { margin-top: 2vh; }
+
+#btn-get-wrapped {
+  background: var(--accent-1);
+  color: black;
+  border: none;
+}
+#btn-get-wrapped:hover { background: #34d399; }
+
+/* UPLOAD AREA */
+.upload-area {
+  flex-shrink: 0;
+  width: 100%;
+  border: 2px dashed #333;
+  border-radius: 20px;
+  padding: 30px 20px;
+  text-align: center;
+  transition: 0.2s;
+}
+.upload-area.drag-over { border-color: var(--text-white); background: #111; }
+.upload-area:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
+
+.upload-instruction {
+  color: var(--text-grey);
+  font-size: 4cqw;
+  margin-bottom: 8px;
+}
+
+.upload-hint-container {
+  margin-bottom: 15px;
+  text-align: center;
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+.upload-hint {
+  color: #ccc;
+  font-size: 3.5cqw;
+  font-family: var(--font-main);
+  line-height: 1.5;
+}
+
+.link-subtle {
+  color: var(--accent-1);
+  text-decoration: underline;
+  cursor: pointer;
+  position: relative;
+  z-index: 100;
+}
+
+/* PRIVACY BADGE */
+.privacy-badge {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 10px 16px;
+  border-radius: 14px;
+  margin-top: 15px;
+  width: 100%;
+}
+
+.privacy-icon { font-size: 4.5cqw; flex-shrink: 0; line-height: 1; }
+.privacy-text { display: flex; flex-direction: column; gap: 4px; text-align: left; line-height: 1; }
+.privacy-text strong { color: var(--accent-1); font-size: 3.8cqw; font-weight: 700; line-height: 1.2; }
+.privacy-text span { color: #888; font-size: 2.8cqw; line-height: 1.4; }
+
+/* SPINNER */
+.spinner {
+  width: 50px; height: 50px;
+  border: 4px solid #333; border-top-color: white;
+  border-radius: 50%; animation: spin 1s infinite linear;
+  margin-bottom: 20px;
+}
+@keyframes spin { to {transform: rotate(360deg);} }
+
+/* FOOTER */
+.slide-footer {
+  margin-top: auto;
+  padding-top: 20px;
+  text-align: center;
+  font-size: 3cqw;
+  color: #555;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.slide-footer a { color: #888; text-decoration: none; }
+.slide-footer a:hover { text-decoration: underline; }

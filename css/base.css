@@ -1,0 +1,97 @@
+/* ChatGPT Wrapped V3 - Base Styles */
+
+:root {
+  --bg-dark: #000000;
+  --text-white: #ffffff;
+  --text-grey: #a1a1aa;
+  
+  --accent-1: #10b981; /* Emerald */
+  --accent-2: #3b82f6; /* Blue */
+  --accent-3: #8b5cf6; /* Violet */
+  
+  --font-main: 'DM Sans', sans-serif;
+  --font-serif: 'Instrument Serif', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background-color: #111;
+  color: var(--text-white);
+  font-family: var(--font-main);
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Desktop Background */
+.desktop-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, #222 0%, #000 100%);
+  z-index: -1;
+}
+
+/* STORY CONTAINER - The Magic Box */
+.story-container {
+  width: 100%;
+  height: 100%;
+  background: var(--bg-dark);
+  position: relative;
+  overflow: hidden;
+  container-type: size; /* Enables container queries */
+  
+  /* Desktop constraints */
+  @media (min-width: 500px) {
+    max-width: 450px; /* Typical phone width */
+    max-height: 90vh;
+    aspect-ratio: 9/16;
+    border-radius: 24px;
+    box-shadow: 0 0 50px rgba(0,0,0,0.5);
+    border: 1px solid #333;
+  }
+}
+
+/* Keyboard Focus Indicators */
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid var(--accent-1);
+  outline-offset: 3px;
+}
+
+.tap-zone:focus-visible {
+  outline: none;
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Skip to content link for screen readers */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--accent-1);
+  color: black;
+  padding: 8px;
+  text-decoration: none;
+  z-index: 1000;
+}
+
+.skip-link:focus {
+  top: 0;
+}

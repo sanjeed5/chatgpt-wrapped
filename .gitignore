@@ -21,3 +21,6 @@ Thumbs.db
 # Testing
 .playwright-mcp/
 test-insights.js
+
+# Local artifacts
+slideshots/
