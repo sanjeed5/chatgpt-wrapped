@@ -17,3 +17,7 @@ Thumbs.db
 # Editor
 .vscode/
 .idea/
+
+# Testing
+.playwright-mcp/
+test-insights.js

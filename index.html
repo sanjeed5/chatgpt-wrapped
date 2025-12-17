@@ -2,95 +2,303 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ChatGPT Wrapped 2025</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Your year with ChatGPT, visualized. A privacy-focused 'Spotify Wrapped' experience for your AI conversations. 100% private, browser-only.">
+  <meta name="keywords" content="ChatGPT, AI, wrapped, statistics, privacy, browser-only">
+  <meta name="author" content="ChatGPT Wrapped">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="ChatGPT Wrapped 2025">
+  <meta property="og:description" content="Discover your AI journey. Your year with ChatGPT, visualized. 100% private, browser-only.">
+  <meta property="og:site_name" content="ChatGPT Wrapped">
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ChatGPT Wrapped 2025">
+  <meta name="twitter:description" content="Discover your AI journey. Your year with ChatGPT, visualized. 100% private, browser-only.">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎁</text></svg>">
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="app">
-    <!-- Upload Screen -->
-    <div id="upload-screen" class="screen active">
-      <div class="container">
-        <h1 class="logo">ChatGPT Wrapped <span class="year">2025</span></h1>
-        
-        <p class="tagline">See your year with AI — conversations, patterns, and more.</p>
-        
-        <!-- Step 1: Export Instructions -->
-        <div class="steps-card">
-          <p class="steps-title">Step 1: Export your ChatGPT data</p>
-          <ol class="steps-list">
-            <li>Go to <a href="https://chatgpt.com/#settings/DataControls" target="_blank">chatgpt.com → Settings → Data Controls</a></li>
-            <li>Click <strong>Export data</strong> → Confirm</li>
-            <li>Wait for the email <span class="step-note">(5-30 min)</span> — <a href="https://mail.google.com/mail/u/0/#advanced-search/from=noreply%40tm.openai.com&subject=ChatGPT+-+Your+data+export+is+ready&query=from%3A(noreply%40tm.openai.com)" target="_blank">Find it in Gmail</a></li>
-          </ol>
-        </div>
-        
-        <!-- Step 2: Upload -->
-        <div class="steps-card">
-          <p class="steps-title">Step 2: Upload it here</p>
-          <div class="dropzone" id="dropzone">
-            <p class="dropzone-text">Drop your export here</p>
-            <p class="dropzone-hint">or click to browse</p>
-          </div>
-          <p class="file-types">Accepts .zip or conversations.json</p>
-        </div>
-        
-        <input type="file" id="file-input" accept=".zip,.json" hidden>
-        
-        <div class="divider"><span>or</span></div>
-        
-        <button id="btn-demo" class="btn btn-secondary">See demo with sample data</button>
-        
-        <p class="privacy">🔒 100% private — runs entirely in your browser</p>
-      </div>
+
+  <!-- Background for Desktop -->
+  <div class="desktop-bg"></div>
+
+  <!-- Main Story Container (Fixed Aspect Ratio) -->
+  <main id="app" class="story-container">
+    
+    <!-- Progress Bars -->
+    <div class="progress-container" id="progress-container">
+      <!-- Bars injected by JS -->
     </div>
 
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="screen">
-      <div class="container">
+    <!-- Navigation Tap Zones -->
+    <div class="tap-zone left" id="tap-left" style="display: none;"></div>
+    <div class="tap-zone right" id="tap-right" style="display: none;"></div>
+
+    <!-- SLIDES -->
+    
+    <!-- 1. UPLOAD SLIDE -->
+    <section class="slide active" id="slide-upload">
+      <div class="slide-content">
+        <div class="logo-pill">ChatGPT Wrapped</div>
+        
+        <div class="hero-text-group">
+          <h1 class="title-huge">2025</h1>
+          <p class="subtitle">Your year with AI.</p>
+        </div>
+
+        <div class="upload-area" id="drop-zone">
+          <div class="icon">📁</div>
+          <p>Drop <strong>conversations.json</strong> or <strong>.zip</strong></p>
+          <button id="btn-select" class="btn-primary">Select File</button>
+          <button id="btn-demo" class="btn-text">Try Demo</button>
+          <input type="file" id="file-input" hidden accept=".json,.zip">
+        </div>
+        
+        <p class="privacy-tiny">🔒 100% Private • Browser-only</p>
+      </div>
+    </section>
+
+    <!-- 2. LOADING SLIDE -->
+    <section class="slide" id="slide-loading">
+      <div class="slide-content centered">
         <div class="spinner"></div>
-        <p class="loading-text">Analyzing your conversations...</p>
-        <p class="loading-status" id="loading-status">Reading file...</p>
+        <h2>Crunching the numbers...</h2>
       </div>
-    </div>
+    </section>
 
-    <!-- Error Screen -->
-    <div id="error-screen" class="screen">
-      <div class="container">
-        <p class="error-icon">😕</p>
-        <h2>Something went wrong</h2>
-        <p class="error-message" id="error-message">Could not parse the file.</p>
-        <button class="btn btn-primary" onclick="location.reload()">Try again</button>
+    <!-- 3. ERROR SLIDE -->
+    <section class="slide slide-error" id="slide-error">
+      <div class="slide-content centered">
+        <div class="error-icon">⚠️</div>
+        <h2 class="error-title">Oops!</h2>
+        <p class="error-message" id="error-message">Something went wrong.</p>
+        <button id="btn-error-back" class="btn-primary" style="margin-top: 3vh;">Try Again</button>
       </div>
-    </div>
+    </section>
 
-    <!-- Slides Screen -->
-    <div id="slides-screen" class="screen">
-      <div class="slides-container" id="slides-container"></div>
-      
-      <button class="btn-restart" id="btn-restart" title="Start over">&times;</button>
-      
-      <div class="click-zone left" id="prev-zone"></div>
-      <div class="click-zone right" id="next-zone"></div>
-      
-      <div class="nav-dots" id="nav-dots"></div>
-      
-      <div class="nav-arrows">
-        <button class="nav-arrow" id="btn-prev">←</button>
-        <button class="nav-arrow" id="btn-next">→</button>
+    <!-- DYNAMIC SLIDES CONTAINER -->
+    <div id="dynamic-slides"></div>
+
+  </main>
+
+  <!-- TEMPLATES FOR DYNAMIC SLIDES -->
+  <template id="tpl-slide-journey">
+    <section class="slide slide-dark">
+      <div class="slide-content centered">
+        <p class="eyebrow">The Beginning</p>
+        <h2 class="title-md" style="font-size: 7cqw; margin-bottom: 5vh">Your AI journey began</h2>
+        
+        <div class="date-display">
+          <div class="journey-date-wrapper">
+            <div class="journey-date" data-hook="first-date-short">Jan 2</div>
+            <div class="journey-year" data-hook="first-year">2023</div>
+          </div>
+          <p class="journey-days-text" data-hook="days-since">0 days ago</p>
+        </div>
+        
+        <div class="first-convo-card">
+          <p class="convo-label">First conversation:</p>
+          <p class="convo-title" data-hook="first-title">Untitled</p>
+        </div>
       </div>
-    </div>
-  </div>
+    </section>
+  </template>
+
+  <template id="tpl-slide-intro">
+    <section class="slide slide-gradient-1">
+      <div class="slide-content centered">
+        <p class="eyebrow">The Overview</p>
+        <h1 class="stat-huge" data-animate>2025</h1>
+        <p class="stat-desc">You really went for it.</p>
+        
+        <div class="stats-row">
+          <div class="stat-box">
+            <span class="val" data-hook="total-convos">0</span>
+            <span class="lbl">Conversations</span>
+          </div>
+          <div class="stat-box">
+            <span class="val" data-hook="active-days">0</span>
+            <span class="lbl">Active Days</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+  
+  <template id="tpl-slide-growth">
+    <section class="slide slide-gradient-2">
+      <div class="slide-content centered">
+        <p class="eyebrow">Year Over Year</p>
+        <h1 class="stat-huge text-gradient" data-hook="growth-multiple">2.3x</h1>
+        <p class="stat-label">more than last year</p>
+        
+        <div class="stats-row" style="margin-top: 6vh">
+          <div class="stat-box">
+            <span class="val" data-hook="this-year">0</span>
+            <span class="lbl">2025</span>
+          </div>
+          <div class="stat-box">
+            <span class="val" data-hook="last-year">0</span>
+            <span class="lbl">2024</span>
+          </div>
+        </div>
+        
+        <p class="stat-desc" style="margin-top: 5vh" data-hook="growth-message">You're locked in.</p>
+      </div>
+    </section>
+  </template>
+
+  <template id="tpl-slide-peak">
+    <section class="slide slide-dark">
+      <div class="slide-content centered">
+        <p class="eyebrow">Your Rhythm</p>
+        <h2 class="title-md">You were most active on</h2>
+        
+        <div class="peak-display">
+          <div class="peak-day" data-hook="peak-day">Mondays</div>
+          <div class="peak-time">at <span data-hook="peak-time">2 PM</span></div>
+        </div>
+        
+        <div class="chart-placeholder" data-hook="day-chart">
+          <!-- Day bars will be injected by JS -->
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <template id="tpl-slide-streak">
+    <section class="slide slide-gradient-1">
+      <div class="slide-content centered">
+        <p class="eyebrow">Consistency</p>
+        <h1 class="stat-huge" data-hook="streak-days">14</h1>
+        <p class="stat-label">days straight</p>
+        
+        <div class="streak-fire">🔥</div>
+        
+        <p class="stat-desc" style="margin-top: 5vh">Your longest streak. You showed up.</p>
+      </div>
+    </section>
+  </template>
+
+  <template id="tpl-slide-persona">
+    <section class="slide slide-gradient-2">
+      <div class="slide-content centered">
+        <div class="persona-icon" data-hook="persona-emoji">✨</div>
+        <p class="eyebrow">Your Archetype</p>
+        <h1 class="persona-name" data-hook="persona-type">The Explorer</h1>
+        <p class="persona-text" data-hook="persona-desc">You use AI when inspiration strikes. Quality over quantity.</p>
+        
+        <div class="badge-model">
+          Favorite: <span data-hook="top-model">GPT-4</span>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <template id="tpl-slide-words">
+    <section class="slide slide-dark">
+      <div class="slide-content centered">
+        <p class="eyebrow">The Conversation</p>
+        <h1 class="stat-huge text-gradient" data-hook="words-user">0</h1>
+        <p class="stat-label">Words typed by you</p>
+        
+        <div class="novel-comparison" data-hook="books-comparison">
+          That's <span class="highlight" data-hook="books-written">0</span> books worth.
+        </div>
+      </div>
+    </section>
+  </template>
+  
+  <template id="tpl-slide-biggest-month">
+    <section class="slide slide-gradient-1">
+      <div class="slide-content centered">
+        <p class="eyebrow">Peak Performance</p>
+        <h2 class="title-md">Your busiest month?</h2>
+        
+        <div class="month-display">
+          <div class="month-name" data-hook="biggest-month">March</div>
+          <div class="month-count"><span data-hook="month-count">0</span> conversations</div>
+        </div>
+        
+        <p class="stat-desc" style="margin-top: 5vh">You were on fire 🔥</p>
+      </div>
+    </section>
+  </template>
+
+
+  <template id="tpl-slide-roast">
+    <section class="slide slide-dark">
+      <div class="slide-content centered">
+        <p class="eyebrow">The Reality Check</p>
+        <h1 class="title-md" style="font-size: 7cqw; line-height: 1.5; max-width: 90%" data-hook="roast-text">You are disappointingly normal.</h1>
+      </div>
+    </section>
+  </template>
+
+  <template id="tpl-slide-summary">
+    <section class="slide slide-screenshot">
+      <div class="slide-content centered">
+        <div class="summary-card" id="summary-card">
+          <div class="card-header">
+            <span class="card-logo">ChatGPT Wrapped</span>
+            <span class="card-year">2025</span>
+          </div>
+          
+          <div class="card-body">
+            <div class="hero-stat">
+              <div class="hero-val" data-hook="total-convos">0</div>
+              <div class="hero-label">Conversations</div>
+            </div>
+            
+            <div class="summary-persona-badge">
+              <span data-hook="persona-type">The Explorer</span>
+            </div>
+            
+            <div class="summary-stats-grid">
+              <div class="mini-stat">
+                <span class="mini-val" data-hook="active-days">0</span>
+                <span class="mini-lbl">Active Days</span>
+              </div>
+              <div class="mini-stat">
+                <span class="mini-val" data-hook="total-hours">0</span>
+                <span class="mini-lbl">Hours</span>
+              </div>
+              <div class="mini-stat">
+                <span class="mini-val" data-hook="words-short">0</span>
+                <span class="mini-lbl">Words</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card-footer">chatgpt-wrapped.com</div>
+        </div>
+        
+        <p class="share-prompt">Save, make, and share your story</p>
+        <div class="actions-row">
+          <button id="btn-action" class="btn-primary">Save Image</button>
+        </div>
+      </div>
+    </section>
+  </template>
 
   <script src="js/parser.js"></script>
   <script src="js/stats.js"></script>
-  <script src="js/slides.js"></script>
   <script src="js/demo-data.js"></script>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

@@ -9,47 +9,137 @@ const DemoData = {
    */
   generate() {
     const conversations = [];
+    
+    // More diverse topics organized by category
+    const codingTopics = [
+      'Python debugging memory leak',
+      'JavaScript async promises explained',
+      'React hooks useEffect dependencies',
+      'TypeScript generics with interfaces',
+      'API design REST principles',
+      'SQL query performance optimization',
+      'Git merge conflict resolution',
+      'Docker container networking',
+      'Algorithm complexity analysis',
+      'Database indexing strategies',
+      'Testing Jest mock functions',
+      'Node.js event loop explained',
+      'CSS flexbox layout patterns',
+      'Redux state management',
+      'GraphQL schema design'
+    ];
+    
+    const workTopics = [
+      'Email writing professional tone',
+      'Project management best practices',
+      'Team meeting agenda template',
+      'Business proposal structure',
+      'Presentation skills improvement',
+      'Salary negotiation strategies',
+      'Career growth planning',
+      'Interview preparation tips',
+      'Resume writing keywords',
+      'Performance review preparation'
+    ];
+    
+    const creativeTopics = [
+      'Writing engaging blog posts',
+      'Story ideas science fiction',
+      'Content strategy planning',
+      'Creative brainstorming techniques',
+      'Design thinking process',
+      'Marketing campaign ideas',
+      'Video script writing',
+      'Copywriting persuasive techniques'
+    ];
+    
+    const learningTopics = [
+      'Understanding machine learning basics',
+      'Learning Spanish conversation',
+      'Mathematics linear algebra',
+      'History World War II',
+      'Philosophy existentialism intro',
+      'Economics supply demand',
+      'Psychology cognitive biases',
+      'Science climate change'
+    ];
+    
+    const personalTopics = [
+      'Healthy meal prep ideas',
+      'Workout routine building',
+      'Recipe ideas dinner vegetarian',
+      'Travel planning Japan itinerary',
+      'Morning routine productivity',
+      'Meditation mindfulness practice',
+      'Book recommendations fiction',
+      'Home office setup ergonomic',
+      'Time management techniques',
+      'Stress management strategies'
+    ];
+    
     const topics = [
-      'Help with Python debugging',
-      'Recipe ideas for dinner',
-      'Understanding machine learning',
-      'Email writing help',
-      'JavaScript async/await',
-      'Workout routine suggestions',
-      'Book recommendations',
-      'SQL query optimization',
-      'Travel tips for Japan',
-      'React hooks explanation',
-      'Interview preparation',
-      'Git branching strategies',
-      'CSS Grid vs Flexbox',
-      'Startup ideas brainstorm',
-      'Docker basics explained',
-      'Meditation getting started',
-      'API design best practices',
-      'Morning routine tips',
-      'TypeScript generics help',
-      'Salary negotiation advice',
-      'Home office setup ideas',
-      'Learning Spanish tips',
-      'Debugging CSS issues',
-      'Writing better code reviews',
-      'Managing work stress',
-      'Planning a birthday party',
-      'Building a portfolio site',
-      'Understanding REST vs GraphQL',
-      'Improving presentation skills',
-      'Healthy meal prep ideas'
+      ...codingTopics,
+      ...workTopics,
+      ...creativeTopics,
+      ...learningTopics,
+      ...personalTopics
     ];
 
     const models = ['gpt-4o', 'gpt-4o', 'gpt-4o', 'gpt-4', 'o1', 'gpt-4o-mini'];
+    
+    let convId = 1;
+    
+    // Add first conversation from early 2023 (the beginning of the journey)
+    const firstConvoDate = new Date(2023, 0, 15, 14, 30); // Jan 15, 2023
+    conversations.push({
+      id: 'conv-first-ever',
+      title: 'What is ChatGPT and how does it work?',
+      create_time: firstConvoDate.getTime() / 1000,
+      update_time: firstConvoDate.getTime() / 1000 + 600,
+      default_model_slug: 'gpt-3.5-turbo',
+      mapping: this.generateMapping(3)
+    });
+    convId++;
+    
+    // Add some 2023 conversations (sporadic usage)
+    for (let i = 0; i < 15; i++) {
+      const month = Math.floor(Math.random() * 12);
+      const day = 1 + Math.floor(Math.random() * 28);
+      const date = new Date(2023, month, day, 10 + Math.floor(Math.random() * 10), 30);
+      
+      conversations.push({
+        id: `conv-2023-${i}`,
+        title: topics[Math.floor(Math.random() * topics.length)],
+        create_time: date.getTime() / 1000,
+        update_time: date.getTime() / 1000 + 300,
+        default_model_slug: Math.random() > 0.5 ? 'gpt-3.5-turbo' : 'gpt-4',
+        mapping: this.generateMapping(2 + Math.floor(Math.random() * 4))
+      });
+      convId++;
+    }
+    
+    // Add 2024 conversations (growing usage)
+    for (let i = 0; i < 120; i++) {
+      const month = Math.floor(Math.random() * 12);
+      const day = 1 + Math.floor(Math.random() * 28);
+      const date = new Date(2024, month, day, 9 + Math.floor(Math.random() * 12), 30);
+      
+      conversations.push({
+        id: `conv-2024-${i}`,
+        title: topics[Math.floor(Math.random() * topics.length)],
+        create_time: date.getTime() / 1000,
+        update_time: date.getTime() / 1000 + 400,
+        default_model_slug: Math.random() > 0.3 ? 'gpt-4' : 'gpt-4o',
+        mapping: this.generateMapping(2 + Math.floor(Math.random() * 6))
+      });
+      convId++;
+    }
     
     // Generate conversations throughout 2025
     // More activity on weekdays, less on weekends
     // Peak hours: 9-11am, 2-4pm, 8-10pm
     
     const year = 2025;
-    let convId = 1;
     
     // January to current date (or December for demo)
     for (let month = 0; month < 12; month++) {
@@ -113,7 +203,32 @@ const DemoData = {
         create_time: createTime,
         update_time: createTime + 300,
         default_model_slug: 'gpt-4o',
-        mapping: this.generateMapping(3)
+        mapping: this.generateMapping(3, true) // Add politeness
+      });
+    }
+    
+    // Add a super long conversation (to showcase longest convo stat)
+    const longConvoDate = new Date(year, 4, 15, 14, 30); // Mid-May
+    conversations.push({
+      id: 'conv-longest-epic',
+      title: 'Building a full-stack app with React and Node.js',
+      create_time: longConvoDate.getTime() / 1000,
+      update_time: longConvoDate.getTime() / 1000 + 7200,
+      default_model_slug: 'gpt-4o',
+      mapping: this.generateMapping(25, true) // 25 message pairs = 50 messages!
+    });
+    
+    // Add some late night sessions (for night owl detection)
+    for (let i = 0; i < 8; i++) {
+      const lateDay = 10 + i * 3;
+      const lateDate = new Date(year, 7, lateDay, 2 + Math.floor(Math.random() * 2), 30);
+      conversations.push({
+        id: `conv-night-${i}`,
+        title: topics[Math.floor(Math.random() * topics.length)],
+        create_time: lateDate.getTime() / 1000,
+        update_time: lateDate.getTime() / 1000 + 600,
+        default_model_slug: 'o1',
+        mapping: this.generateMapping(4)
       });
     }
     
@@ -126,7 +241,7 @@ const DemoData = {
   /**
    * Generate message mapping with realistic content
    */
-  generateMapping(pairs) {
+  generateMapping(pairs, includePoliteness = false) {
     const mapping = {};
     const userPhrases = [
       'Can you help me with',
@@ -137,6 +252,15 @@ const DemoData = {
       'I\'m trying to figure out',
       'What are your thoughts on',
       'Help me understand'
+    ];
+    
+    const politePhrases = [
+      'Could you please help me with',
+      'I would really appreciate if you could',
+      'Thank you so much for',
+      'Please explain',
+      'I\'d be grateful if you could',
+      'Thanks for helping me understand'
     ];
     
     const assistantStarts = [
@@ -157,13 +281,17 @@ const DemoData = {
       const userWordCount = 10 + Math.floor(Math.random() * 50);
       const assistantWordCount = 50 + Math.floor(Math.random() * 200);
       
+      // Mix in polite phrases occasionally
+      const usePolite = includePoliteness || (Math.random() < 0.3);
+      const phrases = usePolite && Math.random() < 0.5 ? politePhrases : userPhrases;
+      
       mapping[userMsgId] = {
         id: userMsgId,
         message: {
           author: { role: 'user' },
           content: {
             content_type: 'text',
-            parts: [this.generateText(userPhrases, userWordCount)]
+            parts: [this.generateText(phrases, userWordCount)]
           }
         }
       };
