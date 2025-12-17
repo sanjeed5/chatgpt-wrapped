@@ -8,7 +8,7 @@ Your year with ChatGPT, visualized. A local-first, privacy-focused "Spotify Wrap
 
 ## 🚀 Try It
 
-**[chatgptwrapped.com](https://chatgptwrapped.com)** *(or run locally)*
+**[gptwrapped.sanjeed.in](https://gptwrapped.sanjeed.in)** *(or run locally)*
 
 ## ✨ Features
 

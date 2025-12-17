@@ -379,7 +379,7 @@ const App = {
   },
 
   shareOnX() {
-    const text = encodeURIComponent(`My ChatGPT Wrapped 2025: ${this.stats?.conversations || 0} conversations this year! 🤖✨\n\nCheck out yours at chatgpt-wrapped.com`);
+    const text = encodeURIComponent(`My ChatGPT Wrapped 2025: ${this.stats?.conversations || 0} conversations this year! 🤖✨\n\nCheck out yours at gptwrapped.sanjeed.in`);
     const url = `https://twitter.com/intent/tweet?text=${text}`;
     window.open(url, '_blank', 'width=550,height=420');
   },
