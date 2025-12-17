@@ -93,6 +93,10 @@ body {
   bottom: 0;
   z-index: 50;
   cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
 }
 .tap-zone.left { left: 0; width: 30%; }
 .tap-zone.right { right: 0; width: 70%; }
@@ -221,6 +225,39 @@ body {
   cursor: pointer;
   width: 100%;
   margin-bottom: 10px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255,255,255,0.3);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: #000;
+  color: white;
+  border: 2px solid white;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 4cqw;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 10px;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #1a1a1a;
+  transform: translateY(-2px);
+}
+
+.btn-secondary:active {
+  transform: translateY(0);
 }
 
 .btn-text {
@@ -630,7 +667,7 @@ body {
   text-align: center;
 }
 
-.actions-row { display: flex; gap: 10px; width: 100%; }
+.actions-row { display: flex; gap: 10px; width: 100%; flex-direction: column; }
 
 /* Spinner */
 .spinner {
@@ -666,4 +703,87 @@ body {
 @keyframes pulse {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.1); }
+}
+
+/* Confetti Animation */
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  background: var(--accent-1);
+  position: absolute;
+  animation: confetti-fall 3s ease-out forwards;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* Counter Animation */
+.stat-huge[data-animate],
+.stat-box .val[data-animate] {
+  animation: count-up 1s ease-out;
+}
+
+@keyframes count-up {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Keyboard Focus Indicators */
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid var(--accent-1);
+  outline-offset: 3px;
+}
+
+.tap-zone:focus-visible {
+  outline: none;
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Skip to content link for screen readers */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--accent-1);
+  color: black;
+  padding: 8px;
+  text-decoration: none;
+  z-index: 1000;
+}
+
+.skip-link:focus {
+  top: 0;
 }

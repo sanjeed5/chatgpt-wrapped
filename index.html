@@ -32,21 +32,23 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- Skip to content for screen readers -->
+  <a href="#app" class="skip-link">Skip to content</a>
 
   <!-- Background for Desktop -->
   <div class="desktop-bg"></div>
 
   <!-- Main Story Container (Fixed Aspect Ratio) -->
-  <main id="app" class="story-container">
+  <main id="app" class="story-container" role="main" aria-label="ChatGPT Wrapped Story">
     
     <!-- Progress Bars -->
-    <div class="progress-container" id="progress-container">
+    <div class="progress-container" id="progress-container" role="progressbar" aria-label="Story progress">
       <!-- Bars injected by JS -->
     </div>
 
     <!-- Navigation Tap Zones -->
-    <div class="tap-zone left" id="tap-left" style="display: none;"></div>
-    <div class="tap-zone right" id="tap-right" style="display: none;"></div>
+    <button class="tap-zone left" id="tap-left" style="display: none;" aria-label="Previous slide" tabindex="-1"></button>
+    <button class="tap-zone right" id="tap-right" style="display: none;" aria-label="Next slide" tabindex="-1"></button>
 
     <!-- SLIDES -->
     
@@ -76,7 +78,8 @@
     <section class="slide" id="slide-loading">
       <div class="slide-content centered">
         <div class="spinner"></div>
-        <h2>Crunching the numbers...</h2>
+        <h2 id="loading-message">Crunching the numbers...</h2>
+        <p class="loading-subtext" id="file-size-indicator" style="margin-top: 2vh; font-size: 3.5cqw; color: var(--text-grey);"></p>
       </div>
     </section>
 
@@ -287,10 +290,12 @@
           <div class="card-footer">chatgpt-wrapped.com</div>
         </div>
         
-        <p class="share-prompt">Save, make, and share your story</p>
+        <p class="share-prompt">Save and share your story</p>
         <div class="actions-row">
-          <button id="btn-action" class="btn-primary">Save Image</button>
+          <button id="btn-download" class="btn-primary">Download Image</button>
+          <button id="btn-share-x" class="btn-secondary">Share on 𝕏</button>
         </div>
+        <button id="btn-replay" class="btn-text" style="margin-top: 2vh;">↻ Replay</button>
       </div>
     </section>
   </template>

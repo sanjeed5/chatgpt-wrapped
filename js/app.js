@@ -98,12 +98,12 @@ const App = {
     
     // Delegate events for dynamic buttons
     document.addEventListener('click', (e) => {
-      if (e.target.id === 'btn-action') {
-        if (this.isDemo) {
-          window.location.reload();
-        } else {
-          this.downloadSummary();
-        }
+      if (e.target.id === 'btn-download') {
+        this.downloadSummary();
+      } else if (e.target.id === 'btn-share-x') {
+        this.shareOnX();
+      } else if (e.target.id === 'btn-replay') {
+        this.replayStory();
       } else if (e.target.id === 'btn-error-back') {
         this.goToSlide(0);
       }
@@ -115,6 +115,14 @@ const App = {
   async handleFile(file) {
     this.isDemo = false;
     this.goToSlide(1); // Loading slide
+    
+    // Show file size
+    const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+    const sizeIndicator = document.getElementById('file-size-indicator');
+    if (sizeIndicator) {
+      sizeIndicator.textContent = `Processing ${sizeInMB} MB...`;
+    }
+    
     try {
       const conversations = await Parser.parse(file, () => {});
       this.processData(conversations);
@@ -185,11 +193,15 @@ const App = {
       });
     }
     
-    // 2. Intro (2025 overview)
-    createSlide('tpl-slide-intro', {
+    // 2. Intro (2025 overview) - with confetti!
+    const introSlide = createSlide('tpl-slide-intro', {
       'total-convos': stats.conversations,
       'active-days': stats.activeDays
     });
+    
+    // Add animation data attribute
+    const introStatHuge = introSlide.querySelector('.stat-huge');
+    if (introStatHuge) introStatHuge.setAttribute('data-animate', 'true');
 
     // 3. YoY Growth
     if (stats.yoyGrowth && stats.previousYearConversations > 0) {
@@ -298,12 +310,8 @@ const App = {
       'persona-type': summaryPersona
     });
 
-    // Configure action button
-    const summarySlide = container.lastElementChild;
-    const actionBtn = summarySlide.querySelector('#btn-action');
-    if (actionBtn) {
-      actionBtn.textContent = this.isDemo ? 'Try with your data' : 'Save Image';
-    }
+    // Action buttons are now separate (btn-download, btn-share-x, btn-replay)
+    // No need to configure anything here anymore
   },
 
   // --- NAVIGATION & ANIMATION ---
@@ -343,6 +351,23 @@ const App = {
     this.currentSlideIndex = index;
     const curr = this.slides[this.currentSlideIndex];
     curr.classList.add('active');
+    
+    // Trigger confetti on special slides
+    if (index === 3 && this.stats) { // First data slide
+      setTimeout(() => this.triggerConfetti(), 300);
+    }
+    
+    // Announce to screen readers
+    const slideTitle = curr.querySelector('h1, h2');
+    if (slideTitle) {
+      const announcement = document.createElement('div');
+      announcement.setAttribute('role', 'status');
+      announcement.setAttribute('aria-live', 'polite');
+      announcement.className = 'sr-only';
+      announcement.textContent = `Slide ${index + 1} of ${this.slides.length}: ${slideTitle.textContent}`;
+      document.body.appendChild(announcement);
+      setTimeout(() => announcement.remove(), 1000);
+    }
 
     // Toggle Tap Zones
     // Active for story slides (index >= 3, after error slide) BUT NOT the last slide (summary), 
@@ -460,12 +485,54 @@ const App = {
 
   downloadSummary() {
     const card = document.getElementById('summary-card');
+    const btn = document.getElementById('btn-download');
+    const originalText = btn.textContent;
+    btn.textContent = 'Generating...';
+    btn.disabled = true;
+    
     html2canvas(card, { backgroundColor: null }).then(canvas => {
       const link = document.createElement('a');
       link.download = 'chatgpt-wrapped-2025.png';
       link.href = canvas.toDataURL();
       link.click();
+      
+      btn.textContent = '✓ Downloaded!';
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }, 2000);
     });
+  },
+
+  shareOnX() {
+    const text = encodeURIComponent(`My ChatGPT Wrapped 2025: ${this.stats?.conversations || 0} conversations this year! 🤖✨\n\nCheck out yours at chatgpt-wrapped.com`);
+    const url = `https://twitter.com/intent/tweet?text=${text}`;
+    window.open(url, '_blank', 'width=550,height=420');
+  },
+
+  replayStory() {
+    // Go to first data slide
+    this.goToSlide(3);
+  },
+
+  triggerConfetti() {
+    const colors = ['#10b981', '#3b82f6', '#8b5cf6', '#ffffff'];
+    for (let i = 0; i < 50; i++) {
+      setTimeout(() => {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.top = '-10px';
+        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = Math.random() * 0.5 + 's';
+        confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        
+        const currentSlide = this.slides[this.currentSlideIndex];
+        currentSlide.appendChild(confetti);
+        
+        setTimeout(() => confetti.remove(), 3500);
+      }, i * 30);
+    }
   }
 };
 
