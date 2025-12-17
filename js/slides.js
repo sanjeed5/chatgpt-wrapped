@@ -6,6 +6,19 @@
 const SlideGenerator = {
   generate(stats, container) {
     container.innerHTML = ''; // Clear
+    const toDateKey = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    const parseDateKey = (key) => {
+      if (!key) return null;
+      const parts = key.split('-').map(Number);
+      if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
+      return new Date(parts[0], parts[1] - 1, parts[2]);
+    };
 
     // Helper to fill template
     const createSlide = (tplId, dataFn) => {
@@ -39,13 +52,14 @@ const SlideGenerator = {
       });
     }
     
-    // 2. Intro (2025 overview)
+    // 2. Intro (year overview)
     let introDesc = "You really went for it.";
     if (stats.conversations < 10) introDesc = "Short and sweet.";
     else if (stats.conversations < 50) introDesc = "Just getting started.";
     else if (stats.conversations > 500) introDesc = "A serious commitment.";
 
     const introSlide = createSlide('tpl-slide-intro', {
+      year: stats.year,
       'total-convos': stats.conversations,
       'active-days': stats.activeDays,
       'total-hours': stats.totalHours,
@@ -76,6 +90,8 @@ const SlideGenerator = {
         'growth-label': growthLabel,
         'this-year': stats.conversations,
         'last-year': stats.previousYearConversations,
+        'current-year-label': stats.year,
+        'previous-year-label': stats.year - 1,
         'growth-message': message
       });
 
@@ -85,25 +101,26 @@ const SlideGenerator = {
             const y1 = stats.previousYearConversations;
             const y2 = stats.conversations;
             const max = Math.max(y1, y2);
-            
-            const h1 = Math.max((y1 / max) * 100, 10);
-            const h2 = Math.max((y2 / max) * 100, 10);
+            const h1 = max > 0 ? (y1 / max) * 100 : 0;
+            const h2 = max > 0 ? (y2 / max) * 100 : 0;
+            const previousYear = stats.year - 1;
+            const currentYear = stats.year;
             
             graphContainer.innerHTML = `
               <div class="growth-bar-wrapper">
-                <div class="growth-bar bar-2024" style="height: ${h1}%"></div>
-                <span class="growth-bar-label">2024</span>
+                <div class="growth-bar previous" style="height: ${h1}%"></div>
+                <span class="growth-bar-label">${previousYear}</span>
               </div>
               <div class="growth-bar-wrapper">
-                <div class="growth-bar bar-2025" style="height: ${h2}%"></div>
-                <span class="growth-bar-label">2025</span>
+                <div class="growth-bar current" style="height: ${h2}%"></div>
+                <span class="growth-bar-label">${currentYear}</span>
               </div>
             `;
             
-            const box2024 = growthSlide.querySelector('.growth-box-2024');
-            const box2025 = growthSlide.querySelector('.growth-box-2025');
-            if (box2024) { box2024.style.opacity = '0'; box2024.style.animation = 'fade-in 0.5s ease-out 0.5s forwards'; } 
-            if (box2025) { box2025.style.opacity = '0'; box2025.style.animation = 'fade-in 0.5s ease-out 1.5s forwards'; }
+            const boxPrevious = growthSlide.querySelector('.growth-box-previous');
+            const boxCurrent = growthSlide.querySelector('.growth-box-current');
+            if (boxPrevious) { boxPrevious.style.opacity = '0'; boxPrevious.style.animation = 'fade-in 0.5s ease-out 0.5s forwards'; } 
+            if (boxCurrent) { boxCurrent.style.opacity = '0'; boxCurrent.style.animation = 'fade-in 0.5s ease-out 1.5s forwards'; }
           }
       }
     }
@@ -133,37 +150,24 @@ const SlideGenerator = {
           const heatmapContainer = streakSlide.querySelector('.streak-heatmap-container');
           const heatmapLabel = streakSlide.querySelector('.heatmap-label');
 
-          if (heatmapContainer && stats.dailyActivity) {
-            const today = new Date();
-            const startOfPeriod = new Date();
-            startOfPeriod.setDate(today.getDate() - 111);
+          if (heatmapContainer && stats.dailyActivityAllTime) {
+            const periodDays = 90;
+            const anchorDate = parseDateKey(stats.lastActiveDateKey) || new Date();
+            const startOfPeriod = new Date(anchorDate);
+            startOfPeriod.setDate(anchorDate.getDate() - (periodDays - 1));
             
             if (heatmapLabel) {
-               const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-               const displayedMonths = new Set();
-               const labels = [];
-               
-               [0, 30, 60, 90, 111].forEach(offset => {
-                 const d = new Date(startOfPeriod);
-                 d.setDate(startOfPeriod.getDate() + offset);
-                 const m = months[d.getMonth()];
-                 if (!displayedMonths.has(m)) {
-                   displayedMonths.add(m);
-                   labels.push(m);
-                 }
-               });
-               
-               heatmapLabel.textContent = labels.join(' · ');
+               heatmapLabel.textContent = `Activity: Last ${periodDays} Days`;
             }
 
-            for (let i = 0; i < 112; i++) {
-              const d = new Date();
-              d.setDate(today.getDate() - (111 - i));
-              const dateKey = d.toISOString().split('T')[0];
+            for (let i = 0; i < periodDays; i++) {
+              const d = new Date(startOfPeriod);
+              d.setDate(startOfPeriod.getDate() + i);
+              const dateKey = toDateKey(d);
               
               const cell = document.createElement('div');
               cell.className = 'heatmap-cell';
-              if (stats.dailyActivity[dateKey]) {
+              if (stats.dailyActivityAllTime[dateKey]) {
                 cell.classList.add('active');
                 cell.title = dateKey;
                 cell.style.animation = `fade-in 0.5s ease-out ${Math.random()}s backwards`;
@@ -188,13 +192,13 @@ const SlideGenerator = {
           
           const days = ['Sundays', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays'];
           const counts = days.map(day => stats.peakDayDistribution[day] || 0);
-          const maxCount = Math.max(...counts, 1);
+          const maxCount = Math.max(...counts);
           
           days.forEach((day, idx) => {
             const bar = document.createElement('div');
             bar.className = 'bar';
             if (day === stats.peakDay) bar.classList.add('active');
-            const height = Math.max((counts[idx] / maxCount) * 100, 5); 
+            const height = maxCount > 0 ? (counts[idx] / maxCount) * 100 : 0;
             bar.style.height = `${height}%`;
             bar.title = `${day}: ${counts[idx]} conversations`;
             chartContainer.appendChild(bar);
@@ -292,6 +296,7 @@ const SlideGenerator = {
     // 11. Summary
     const summaryPersona = stats.personality.archetype || stats.personality.type;
     const summarySlide = createSlide('tpl-slide-summary', {
+      year: stats.year,
       'total-convos': stats.conversations,
       'active-days': stats.activeDays,
       'total-hours': stats.totalHours,

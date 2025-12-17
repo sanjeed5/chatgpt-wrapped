@@ -161,10 +161,20 @@ const App = {
 
   processData(conversations) {
     try {
-      this.stats = Stats.compute(conversations, 2025);
+      this.stats = Stats.compute(conversations);
+      const year = this.stats.year;
+      document.title = `ChatGPT Wrapped ${year}`;
+      const ogTitle = document.querySelector('meta[property="og:title"]');
+      if (ogTitle) ogTitle.setAttribute('content', `ChatGPT Wrapped ${year}`);
+      const twitterTitle = document.querySelector('meta[name="twitter:title"]');
+      if (twitterTitle) twitterTitle.setAttribute('content', `ChatGPT Wrapped ${year}`);
       
       // Generate slides using external module
       const { summarySlide } = SlideGenerator.generate(this.stats, this.dom.dynamicSlidesContainer);
+
+      document.querySelectorAll('[data-hook="year"]').forEach(el => {
+        el.textContent = year;
+      });
       
       // Handle Demo Mode state in Summary
       if (this.isDemo && summarySlide) {
@@ -366,7 +376,8 @@ const App = {
     
     html2canvas(card, { backgroundColor: null }).then(canvas => {
       const link = document.createElement('a');
-      link.download = 'chatgpt-wrapped-2025.png';
+      const year = this.stats?.year || new Date().getFullYear();
+      link.download = `chatgpt-wrapped-${year}.png`;
       link.href = canvas.toDataURL();
       link.click();
       
@@ -379,7 +390,8 @@ const App = {
   },
 
   shareOnX() {
-    const text = encodeURIComponent(`My ChatGPT Wrapped 2025: ${this.stats?.conversations || 0} conversations this year! 🤖✨\n\nCheck out yours at gptwrapped.sanjeed.in`);
+    const year = this.stats?.year || new Date().getFullYear();
+    const text = encodeURIComponent(`My ChatGPT Wrapped ${year}: ${this.stats?.conversations || 0} conversations this year! 🤖✨\n\nCheck out yours at gptwrapped.sanjeed.in`);
     const url = `https://twitter.com/intent/tweet?text=${text}`;
     window.open(url, '_blank', 'width=550,height=420');
   },

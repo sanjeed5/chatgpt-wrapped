@@ -7,17 +7,20 @@ const Stats = {
   /**
    * Compute all stats from conversations
    */
-  compute(conversations, targetYear = 2025) {
+  compute(conversations, targetYear) {
     // Filter valid conversations with timestamps
     const validConvos = conversations.filter(c => c.create_time);
     
     // Sort by time
     validConvos.sort((a, b) => a.create_time - b.create_time);
+
+    const resolvedYear = targetYear || this.getLatestYear(validConvos);
+    const yearToAnalyze = resolvedYear || new Date().getFullYear();
     
     // Get conversations by year
     const convosByYear = this.groupByYear(validConvos);
-    const targetYearConvos = convosByYear[targetYear] || [];
-    const previousYearConvos = convosByYear[targetYear - 1] || [];
+    const targetYearConvos = convosByYear[yearToAnalyze] || [];
+    const previousYearConvos = convosByYear[yearToAnalyze - 1] || [];
     
     // First conversation
     const firstConvo = validConvos[0];
@@ -41,13 +44,15 @@ const Stats = {
       : null;
     
     // Daily activity for target year
-    const dailyActivity = this.getDailyActivity(targetYearConvos, targetYear);
+    const dailyActivity = this.getDailyActivity(targetYearConvos, yearToAnalyze);
+    const dailyActivityAllTime = this.getDailyActivity(validConvos);
     const activeDays = Object.keys(dailyActivity).length;
-    const totalDaysInYear = this.getDaysInYear(targetYear);
+    const totalDaysInYear = this.getDaysInYear(yearToAnalyze);
     const activeDaysPct = Math.round((activeDays / totalDaysInYear) * 100);
+    const lastActiveDateKey = this.getLastActiveDateKey(dailyActivityAllTime);
     
     // Longest streak
-    const longestStreak = this.calculateStreak(dailyActivity, targetYear);
+    const longestStreak = this.calculateStreak(dailyActivity, yearToAnalyze);
     
     // Peak hour and day
     const peakHour = this.getPeakHour(targetYearConvos);
@@ -92,7 +97,7 @@ const Stats = {
     const firstConvoTitle = firstConvoOfYear ? this.getConversationTitle(firstConvoOfYear) : 'Untitled';
     
     // Biggest month
-    const monthlyActivity = this.getMonthlyActivity(targetYearConvos, targetYear);
+    const monthlyActivity = this.getMonthlyActivity(targetYearConvos, yearToAnalyze);
     const biggestMonth = this.getBiggestMonth(monthlyActivity);
     
     // Longest conversation
@@ -123,7 +128,7 @@ const Stats = {
           Object.entries(convosByYear).map(([year, convos]) => [year, convos.length])
         )
       },
-      year: targetYear,
+      year: yearToAnalyze,
       conversations: targetYearConvos.length,
       conversationsPerDay: (targetYearConvos.length / totalDaysInYear).toFixed(1),
       yoyGrowth: yoyGrowth ? Math.round(yoyGrowth * 10) / 10 : null,
@@ -136,6 +141,8 @@ const Stats = {
       activeDays,
       activeDaysPct,
       dailyActivity,
+      dailyActivityAllTime,
+      lastActiveDateKey,
       longestStreak,
       peakHour: this.formatHour(peakHour),
       peakHourRaw: peakHour,
@@ -332,11 +339,16 @@ const Stats = {
     const daily = {};
     for (const convo of conversations) {
       const date = new Date(convo.create_time * 1000);
-      if (date.getFullYear() !== year) continue;
-      const dateStr = date.toISOString().split('T')[0];
+      if (typeof year === 'number' && date.getFullYear() !== year) continue;
+      const dateStr = this.formatLocalDateKey(date);
       daily[dateStr] = (daily[dateStr] || 0) + 1;
     }
     return daily;
+  },
+
+  getLastActiveDateKey(dailyActivity) {
+    const dates = Object.keys(dailyActivity).sort();
+    return dates.length > 0 ? dates[dates.length - 1] : null;
   },
 
   calculateStreak(dailyActivity, year) {
@@ -345,8 +357,8 @@ const Stats = {
     let maxStreak = 1;
     let currentStreak = 1;
     for (let i = 1; i < dates.length; i++) {
-      const prevDate = new Date(dates[i - 1]);
-      const currDate = new Date(dates[i]);
+      const prevDate = this.parseDateKey(dates[i - 1]);
+      const currDate = this.parseDateKey(dates[i]);
       const diffDays = Math.round((currDate - prevDate) / (1000 * 60 * 60 * 24));
       if (diffDays === 1) {
         currentStreak++;
@@ -864,5 +876,28 @@ const Stats = {
     const referenceDate = now < endOfYear ? now : endOfYear;
     const startOfYear = new Date(year, 0, 1);
     return Math.ceil((referenceDate - startOfYear) / (1000 * 60 * 60 * 24));
+  },
+
+  getLatestYear(conversations) {
+    if (!conversations || conversations.length === 0) return new Date().getFullYear();
+    let latest = new Date(conversations[0].create_time * 1000).getFullYear();
+    for (const convo of conversations) {
+      const year = new Date(convo.create_time * 1000).getFullYear();
+      if (year > latest) latest = year;
+    }
+    return latest;
+  },
+
+  formatLocalDateKey(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  },
+
+  parseDateKey(key) {
+    const parts = key.split('-').map(Number);
+    if (parts.length !== 3 || parts.some(Number.isNaN)) return new Date(key);
+    return new Date(parts[0], parts[1] - 1, parts[2]);
   }
 };

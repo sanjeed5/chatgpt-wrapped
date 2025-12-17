@@ -218,8 +218,8 @@
   transform-origin: bottom;
   animation: grow-up 1s ease-out forwards;
 }
-.growth-bar.bar-2024 { background: #555; }
-.growth-bar.bar-2025 { background: var(--accent-1); box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
+.growth-bar.previous { background: #555; }
+.growth-bar.current { background: var(--accent-1); box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
 .growth-bar-label { font-size: 3cqw; color: var(--text-grey); }
 
 .slide-growth .slide-content {
