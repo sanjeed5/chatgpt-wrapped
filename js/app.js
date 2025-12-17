@@ -13,11 +13,18 @@ const App = {
   stats: null,
 
   init() {
+    this.updateViewportHeight();
+    window.addEventListener('resize', () => this.updateViewportHeight());
+    window.addEventListener('orientationchange', () => this.updateViewportHeight());
     this.cacheDOM();
     this.bindEvents();
     this.slides = Array.from(document.querySelectorAll('.slide'));
     this.updateProgressUI();
     this.goToSlide(0);
+  },
+
+  updateViewportHeight() {
+    document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
   },
 
   cacheDOM() {
