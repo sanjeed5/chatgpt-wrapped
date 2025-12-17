@@ -59,18 +59,25 @@
         
         <div class="hero-text-group">
           <h1 class="title-huge">2025</h1>
-          <p class="subtitle">Your year with AI.</p>
+          <p class="subtitle">See your AI story unfold.</p>
         </div>
 
         <div class="upload-area" id="drop-zone">
           <div class="icon">📁</div>
-          <p>Drop <strong>conversations.json</strong> or <strong>.zip</strong></p>
+          <p class="upload-instruction">Drop <strong>conversations.json</strong> or <strong>.zip</strong></p>
+          <p class="upload-hint">Export from ChatGPT: Settings → Data controls → Export</p>
           <button id="btn-select" class="btn-primary">Select File</button>
-          <button id="btn-demo" class="btn-text">Try Demo</button>
+          <button id="btn-demo" class="btn-secondary-alt">Try Demo</button>
           <input type="file" id="file-input" hidden accept=".json,.zip">
         </div>
         
-        <p class="privacy-tiny">🔒 100% Private • Browser-only</p>
+        <div class="privacy-badge">
+          <span class="privacy-icon">🔒</span>
+          <div class="privacy-text">
+            <strong>100% Private</strong>
+            <span>All processing happens in your browser. Your data never leaves your device.</span>
+          </div>
+        </div>
       </div>
     </section>
 

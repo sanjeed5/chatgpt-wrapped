@@ -208,10 +208,18 @@ body {
 
 .icon { font-size: 10cqw; margin-bottom: 10px; }
 
-.upload-area p {
+.upload-instruction {
   color: var(--text-grey);
   font-size: 4cqw;
+  margin-bottom: 8px;
+}
+
+.upload-hint {
+  color: #666;
+  font-size: 3cqw;
   margin-bottom: 20px;
+  font-family: var(--font-mono);
+  line-height: 1.4;
 }
 
 .btn-primary {
@@ -269,13 +277,67 @@ body {
   font-size: 3.5cqw;
 }
 
-.privacy-tiny {
+.btn-secondary-alt {
+  background: rgba(255,255,255,0.05);
+  color: white;
+  border: 1px solid #333;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 4cqw;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 10px;
+  transition: all 0.2s;
+}
+
+.btn-secondary-alt:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: #555;
+  transform: translateY(-1px);
+}
+
+.btn-secondary-alt:active {
+  transform: translateY(0);
+}
+
+.privacy-badge {
   position: absolute;
   bottom: 20px;
-  left: 0; right: 0;
-  text-align: center;
-  font-size: 3cqw;
-  color: #444;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 12px 20px;
+  border-radius: 16px;
+  max-width: 85%;
+}
+
+.privacy-icon {
+  font-size: 5cqw;
+  flex-shrink: 0;
+}
+
+.privacy-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.privacy-text strong {
+  color: var(--accent-1);
+  font-size: 3.5cqw;
+  font-weight: 700;
+}
+
+.privacy-text span {
+  color: #666;
+  font-size: 2.5cqw;
+  line-height: 1.3;
 }
 
 /* Stats Slides */
