@@ -30,10 +30,10 @@ const Stats = {
       : 0;
     
     // Message counts
-    const messageCounts = this.countMessages(validConvos);
+    const messageCounts = this.countMessages(targetYearConvos);
     
     // Word counts
-    const wordCounts = this.countWords(validConvos);
+    const wordCounts = this.countWords(targetYearConvos);
     
     // Extract themes from conversations
     const themes = this.extractThemes(targetYearConvos);
@@ -92,8 +92,8 @@ const Stats = {
 
     // Fun Stats
     const politeness = this.calculatePoliteness(targetYearConvos);
-    const totalMinutes = targetYearConvos.length * 5;
-    const totalHours = Math.round(totalMinutes / 60);
+    const estimatedMinutes = this.estimateTimeFromWords(wordCounts);
+    const totalHours = Math.round((estimatedMinutes / 60) * 10) / 10;
     
     // Shocking comparisons
     const coffees = Math.floor(totalHours / 0.5); // 30 min per coffee session
@@ -346,6 +346,20 @@ const Stats = {
       }
     }
     return { user, assistant };
+  },
+
+  /**
+   * Estimate time spent based on words typed vs. words read
+   * Uses conservative defaults for typing (38 wpm) and on-screen reading (200 wpm)
+   */
+  estimateTimeFromWords(wordCounts, options = {}) {
+    const typingWpm = options.typingWpm || 38;
+    const readingWpm = options.readingWpm || 200;
+    const userWords = Math.max(0, wordCounts?.user || 0);
+    const assistantWords = Math.max(0, wordCounts?.assistant || 0);
+    const typingMinutes = userWords / typingWpm;
+    const readingMinutes = assistantWords / readingWpm;
+    return typingMinutes + readingMinutes;
   },
 
   getDailyActivity(conversations, year) {
