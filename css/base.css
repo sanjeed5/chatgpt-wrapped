@@ -55,9 +55,11 @@ body {
   position: relative;
   overflow: hidden;
   container-type: size; /* Enables container queries */
-  
-  /* Desktop constraints */
-  @media (min-width: 500px) {
+}
+
+/* Desktop constraints */
+@media (min-width: 500px) {
+  .story-container {
     max-width: 450px; /* Typical phone width */
     max-height: 90vh;
     aspect-ratio: 9/16;

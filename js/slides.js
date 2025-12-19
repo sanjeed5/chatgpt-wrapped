@@ -20,6 +20,22 @@ const SlideGenerator = {
       return new Date(parts[0], parts[1] - 1, parts[2]);
     };
 
+    const formatNumber = (value) => {
+      if (value === null || value === undefined) return '0';
+      return value.toLocaleString('en-US');
+    };
+
+    const formatShortDate = (date) => {
+      if (!(date instanceof Date)) return '';
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return `${months[date.getMonth()]} ${date.getDate()}`;
+    };
+
+    const monthName = (idx) => {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return months[idx] || '';
+    };
+
     // Helper to fill template
     const createSlide = (tplId, dataFn) => {
       const tpl = document.getElementById(tplId);
@@ -53,22 +69,33 @@ const SlideGenerator = {
     }
     
     // 2. Intro (year overview)
-    let introDesc = "You really went for it.";
-    if (stats.conversations < 10) introDesc = "Short and sweet.";
-    else if (stats.conversations < 50) introDesc = "Just getting started.";
-    else if (stats.conversations > 500) introDesc = "A serious commitment.";
+    let introDesc = "ChatGPT became part of your routine.";
+    if (stats.conversations < 10) introDesc = "A few curious check-ins.";
+    else if (stats.conversations < 50) introDesc = "You stopped by when you needed a nudge.";
+    else if (stats.activeDays >= 250) introDesc = "Practically every day.";
+    else if (stats.totalHours >= 120) introDesc = "This was a full-on collaboration.";
+    else if (stats.conversations >= 500) introDesc = "This became your go-to sidekick.";
+    else if (stats.activeDays >= 150) introDesc = "A steady weekly rhythm.";
+    else if (stats.totalHours >= 50) introDesc = "Plenty of hours together.";
+
+    const introSub = `In ${stats.year}, you logged ${formatNumber(stats.conversations)} chats across ${formatNumber(stats.activeDays)} days.`;
 
     const introSlide = createSlide('tpl-slide-intro', {
       year: stats.year,
       'total-convos': stats.conversations,
       'active-days': stats.activeDays,
       'total-hours': stats.totalHours,
-      'intro-desc': introDesc
+      'intro-desc': introDesc,
+      'intro-sub': introSub
     });
     
     if (introSlide) {
         const introStatHuge = introSlide.querySelector('.stat-huge');
         if (introStatHuge) introStatHuge.setAttribute('data-animate', 'true');
+        if (!introSub) {
+          const subEl = introSlide.querySelector('[data-hook="intro-sub"]');
+          if (subEl) subEl.style.display = 'none';
+        }
     }
 
     // 3. YoY Growth
@@ -77,11 +104,11 @@ const SlideGenerator = {
         ? `${stats.yoyGrowth.toFixed(1)}x`
         : `${Math.round(stats.yoyGrowth * 100)}%`;
       
-      let message = "You're locked in.";
-      if (stats.yoyGrowth >= 3) message = "That's exponential growth.";
-      else if (stats.yoyGrowth >= 2) message = "You're all in.";
-      else if (stats.yoyGrowth >= 1.5) message = "You're hooked.";
-      else if (stats.yoyGrowth < 1) message = 'Quality over quantity.';
+      let message = "Steady compared to last year.";
+      if (stats.yoyGrowth >= 3) message = "Huge jump from last year.";
+      else if (stats.yoyGrowth >= 2) message = "You leaned on it a lot more.";
+      else if (stats.yoyGrowth >= 1.5) message = "You reached for it more often.";
+      else if (stats.yoyGrowth < 1) message = 'A lighter year—still showed up.';
       
       const growthLabel = stats.yoyGrowth >= 1 ? "more than last year" : "of last year's volume";
 
@@ -127,10 +154,10 @@ const SlideGenerator = {
 
     // 4. Biggest Month
     if (stats.biggestMonth) {
-      let monthDesc = "You were on fire 🔥";
+      let monthDesc = "That month was your hot streak.";
       if (stats.biggestMonth.count < 5) monthDesc = "Quality time.";
       else if (stats.biggestMonth.count < 20) monthDesc = "A productive month.";
-      else if (stats.biggestMonth.count > 100) monthDesc = "Absolute unit of a month.";
+      else if (stats.biggestMonth.count > 100) monthDesc = "A ridiculous amount of chats.";
 
       createSlide('tpl-slide-biggest-month', {
         'biggest-month': stats.biggestMonth.month,
@@ -147,32 +174,89 @@ const SlideGenerator = {
       });
 
       if (streakSlide) {
-          const heatmapContainer = streakSlide.querySelector('.streak-heatmap-container');
-          const heatmapLabel = streakSlide.querySelector('.heatmap-label');
+          const heatmapGrid = streakSlide.querySelector('[data-hook="heatmap-grid"]');
+          const heatmapMonths = streakSlide.querySelector('[data-hook="heatmap-months"]');
+          const heatmapLabel = streakSlide.querySelector('[data-hook="heatmap-range"]');
 
-          if (heatmapContainer && stats.dailyActivityAllTime) {
-            const periodDays = 90;
+          if (heatmapGrid && heatmapMonths && stats.dailyActivityAllTime) {
+            const weeksToShow = 26; // roughly half-year view
             const anchorDate = parseDateKey(stats.lastActiveDateKey) || new Date();
-            const startOfPeriod = new Date(anchorDate);
-            startOfPeriod.setDate(anchorDate.getDate() - (periodDays - 1));
-            
-            if (heatmapLabel) {
-               heatmapLabel.textContent = `Activity: Last ${periodDays} Days`;
+            anchorDate.setHours(0, 0, 0, 0);
+
+            const endDate = new Date(anchorDate);
+            endDate.setDate(anchorDate.getDate() + (6 - anchorDate.getDay())); // snap to end of week (Saturday)
+            const startDate = new Date(endDate);
+            startDate.setDate(endDate.getDate() - (weeksToShow * 7) + 1);
+
+            const daysData = [];
+            let maxCount = 0;
+            const totalDays = weeksToShow * 7;
+
+            for (let i = 0; i < totalDays; i++) {
+              const current = new Date(startDate);
+              current.setDate(startDate.getDate() + i);
+              const dateKey = toDateKey(current);
+              const count = stats.dailyActivityAllTime[dateKey] || 0;
+              const isFuture = current > anchorDate;
+              if (!isFuture) maxCount = Math.max(maxCount, count);
+              daysData.push({ date: current, dateKey, count, isFuture });
             }
 
-            for (let i = 0; i < periodDays; i++) {
-              const d = new Date(startOfPeriod);
-              d.setDate(startOfPeriod.getDate() + i);
-              const dateKey = toDateKey(d);
-              
+            heatmapGrid.innerHTML = '';
+            heatmapMonths.innerHTML = '';
+            heatmapGrid.style.setProperty('--weeks', weeksToShow);
+            heatmapMonths.style.setProperty('--weeks', weeksToShow);
+
+            // Month labels
+            let lastMonth = null;
+            for (let w = 0; w < weeksToShow; w++) {
+              const weekStart = new Date(startDate);
+              weekStart.setDate(startDate.getDate() + w * 7);
+              const monthIdx = weekStart.getMonth();
+              if (weekStart.getDate() <= 7 && monthIdx !== lastMonth) {
+                const label = document.createElement('span');
+                label.className = 'month-label';
+                label.style.gridColumn = `${w + 1}`;
+                label.textContent = monthName(monthIdx);
+                heatmapMonths.appendChild(label);
+                lastMonth = monthIdx;
+              }
+            }
+
+            // Cells
+            daysData.forEach(({ date, count, isFuture }, idx) => {
               const cell = document.createElement('div');
               cell.className = 'heatmap-cell';
-              if (stats.dailyActivityAllTime[dateKey]) {
-                cell.classList.add('active');
-                cell.title = dateKey;
+              const weekIdx = Math.floor(idx / 7);
+              const dayOfWeek = idx % 7;
+              cell.style.gridColumn = `${weekIdx + 1}`;
+              cell.style.gridRow = `${dayOfWeek + 1}`;
+
+              if (isFuture) {
+                cell.classList.add('future');
+              } else if (count > 0) {
+                const intensity = maxCount === 0 ? 1 : Math.ceil((count / maxCount) * 4);
+                cell.classList.add(`level-${Math.min(intensity, 4)}`);
+                cell.title = `${monthName(date.getMonth())} ${date.getDate()}, ${date.getFullYear()} · ${count} conversation${count === 1 ? '' : 's'}`;
                 cell.style.animation = `fade-in 0.5s ease-out ${Math.random()}s backwards`;
+              } else {
+                cell.title = `${monthName(date.getMonth())} ${date.getDate()}, ${date.getFullYear()} · 0 conversations`;
               }
-              heatmapContainer.appendChild(cell);
+
+              heatmapGrid.appendChild(cell);
+            });
+
+            if (heatmapLabel) {
+              if (stats.longestStreakRange?.startShort && stats.longestStreakRange?.endShort) {
+                heatmapLabel.textContent = `${stats.longestStreakRange.startShort} – ${stats.longestStreakRange.endShort}`;
+              } else {
+                const includeStartYear = startDate.getFullYear() !== anchorDate.getFullYear();
+                const startLabel = includeStartYear
+                  ? `${formatShortDate(startDate)}, ${startDate.getFullYear()}`
+                  : formatShortDate(startDate);
+                const endLabel = `${formatShortDate(anchorDate)}, ${anchorDate.getFullYear()}`;
+                heatmapLabel.textContent = `${startLabel} – ${endLabel}`;
+              }
             }
           }
       }
@@ -213,11 +297,35 @@ const SlideGenerator = {
       });
     }
 
+    // 8. Politeness
+    if (stats.politeness && stats.politeness.userMessageCount > 0) {
+      const { count, percentage, description } = stats.politeness;
+      const politeSub = count === 1 ? 'please/thanks spotted' : 'pleases & thanks spotted';
+      const politeDesc = description || 'Kindness noticed.';
+      const meterPercent = Math.min(100, Math.max(0, percentage));
+
+      const politenessSlide = createSlide('tpl-slide-politeness', {
+        'polite-count': count.toLocaleString('en-US'),
+        'polite-sub': politeSub,
+        'polite-desc': politeDesc,
+        'polite-footnote': `${percentage}% of your messages`
+      });
+
+      if (politenessSlide) {
+        const meter = politenessSlide.querySelector('[data-hook="polite-meter"]');
+        if (meter) {
+          meter.style.width = `${Math.max(6, meterPercent)}%`;
+          meter.setAttribute('aria-label', `Politeness percentile: ${percentage}% of your messages included please/thanks.`);
+        }
+      }
+    }
+
     // 8. Persona
+    const personaTitle = (stats.personality.type || '').replace(/^[^\w]+\s*/, '').trim();
+
     const personaData = {
-      'persona-type': stats.personality.type,
-      'persona-desc': stats.personality.description,
-      'top-model': stats.topModel
+      'persona-type': personaTitle || stats.personality.archetype,
+      'persona-desc': stats.personality.description
     };
     
     if (stats.personality.emoji) {
@@ -233,12 +341,6 @@ const SlideGenerator = {
            sub.className = 'persona-reason';
            sub.textContent = stats.personality.reason;
            descriptionEl.parentNode.insertBefore(sub, descriptionEl.nextSibling);
-        }
-        
-        // Hide model badge if missing (though removed from template, safe to keep check)
-        if (!stats.topModel) {
-          const badge = personaSlide.querySelector('.badge-model');
-          if (badge) badge.style.display = 'none';
         }
 
         const emojiEl = personaSlide.querySelector('.persona-icon');
@@ -257,22 +359,23 @@ const SlideGenerator = {
         
         slide.querySelector('[data-hook="words-user"]').textContent = stats.wordsTypedFormatted;
         
+        const wordsTypedRaw = stats.wordsTyped;
         const booksWritten = stats.booksWritten || stats.novelsEquivalent;
         const comparisonEl = slide.querySelector('[data-hook="books-comparison"]');
         const writtenEl = slide.querySelector('[data-hook="books-written"]');
         
-        if (booksWritten > 0) {
+        if (booksWritten >= 5) {
           if (writtenEl) writtenEl.textContent = booksWritten;
-        } else {
-          const essays = Math.floor(stats.wordsTyped / 500);
-          if (essays > 0) {
+        } else if (booksWritten >= 1) {
+          if (writtenEl) writtenEl.textContent = booksWritten;
+          if (comparisonEl) comparisonEl.innerHTML = `That's <span class="highlight">${booksWritten}</span> book${booksWritten === 1 ? '' : 's'} worth.`;
+        } else if (comparisonEl) {
+          const essays = Math.max(1, Math.floor(wordsTypedRaw / 500));
+          if (essays >= 1 && wordsTypedRaw >= 1000) {
             comparisonEl.innerHTML = `That's <span class="highlight">${essays}</span> essays worth.`;
           } else {
-             comparisonEl.textContent = 'Every word counts. ';
-             const highlight = document.createElement('span');
-             highlight.className = 'highlight';
-             highlight.textContent = 'You\'re building something.';
-             comparisonEl.appendChild(highlight);
+            const tweets = Math.max(1, Math.floor(wordsTypedRaw / 40));
+            comparisonEl.innerHTML = `That's about <span class="highlight">${tweets}</span> tweets worth.`;
           }
         }
         container.appendChild(slide);
@@ -294,7 +397,8 @@ const SlideGenerator = {
     }
 
     // 11. Summary
-    const summaryPersona = stats.personality.archetype || stats.personality.type;
+    const summaryPersonaRaw = stats.personality.archetype || stats.personality.type || '';
+    const summaryPersona = summaryPersonaRaw.replace(/^[^\w]+\s*/, '').trim();
     const summarySlide = createSlide('tpl-slide-summary', {
       year: stats.year,
       'total-convos': stats.conversations,

@@ -52,7 +52,18 @@ const Stats = {
     const lastActiveDateKey = this.getLastActiveDateKey(dailyActivityAllTime);
     
     // Longest streak
-    const longestStreak = this.calculateStreak(dailyActivity, yearToAnalyze);
+    const streakData = this.calculateStreak(dailyActivity, yearToAnalyze);
+    const longestStreak = streakData.length;
+    const longestStreakRange = longestStreak > 0 && streakData.startKey && streakData.endKey
+      ? {
+          startKey: streakData.startKey,
+          endKey: streakData.endKey,
+          start: this.formatDate(this.parseDateKey(streakData.startKey)),
+          end: this.formatDate(this.parseDateKey(streakData.endKey)),
+          startShort: this.formatDateShort(this.parseDateKey(streakData.startKey)),
+          endShort: this.formatDateShort(this.parseDateKey(streakData.endKey))
+        }
+      : null;
     
     // Peak hour and day
     const peakHour = this.getPeakHour(targetYearConvos);
@@ -75,7 +86,8 @@ const Stats = {
       longestStreak,
       peakHour,
       wordCounts,
-      themes
+      themes,
+      talkRatio
     });
 
     // Fun Stats
@@ -144,6 +156,7 @@ const Stats = {
       dailyActivityAllTime,
       lastActiveDateKey,
       longestStreak,
+      longestStreakRange,
       peakHour: this.formatHour(peakHour),
       peakHourRaw: peakHour,
       peakDay,
@@ -353,21 +366,29 @@ const Stats = {
 
   calculateStreak(dailyActivity, year) {
     const dates = Object.keys(dailyActivity).sort();
-    if (dates.length === 0) return 0;
+    if (dates.length === 0) return { length: 0, startKey: null, endKey: null };
     let maxStreak = 1;
     let currentStreak = 1;
+    let currentStart = dates[0];
+    let bestStart = dates[0];
+    let bestEnd = dates[0];
     for (let i = 1; i < dates.length; i++) {
       const prevDate = this.parseDateKey(dates[i - 1]);
       const currDate = this.parseDateKey(dates[i]);
       const diffDays = Math.round((currDate - prevDate) / (1000 * 60 * 60 * 24));
       if (diffDays === 1) {
         currentStreak++;
-        maxStreak = Math.max(maxStreak, currentStreak);
+        if (currentStreak > maxStreak) {
+          maxStreak = currentStreak;
+          bestStart = currentStart;
+          bestEnd = dates[i];
+        }
       } else {
         currentStreak = 1;
+        currentStart = dates[i];
       }
     }
-    return maxStreak;
+    return { length: maxStreak, startKey: bestStart, endKey: bestEnd };
   },
 
   getPeakHour(conversations) {
@@ -446,13 +467,14 @@ const Stats = {
   },
 
   classifyPersonality(data) {
-    const { totalConvos, activeDays, activeDaysPct, longestStreak, peakHour, wordCounts, themes } = data;
+    const { totalConvos, activeDays, activeDaysPct, longestStreak, peakHour, wordCounts, themes, talkRatio } = data;
     
     // Calculate metrics
     const avgWordsPerConvo = totalConvos > 0 ? Math.round(wordCounts.user / totalConvos) : 0;
     const intensity = totalConvos / (activeDays || 1); // Convos per active day
     const primaryTheme = themes?.categories?.primary || 'general';
-    
+    const estimatedHours = Math.max(1, Math.round((totalConvos * 5) / 60)); // rough hours from convo count
+
     // Priority-based classification (check most specific first)
     
     // 1. Time-based archetypes (strongest signal)
@@ -460,6 +482,7 @@ const Stats = {
       return { 
         type: '🦉 THE NIGHT OWL', 
         description: 'While the world sleeps, you\'re deep in conversation with AI. Your best ideas come after midnight.',
+        reason: `Peak activity around ${peakHour}:00 — late night is your creative window.`,
         emoji: '🦉',
         archetype: 'Night Owl'
       };
@@ -469,6 +492,7 @@ const Stats = {
       return { 
         type: '🌅 THE EARLY BIRD', 
         description: 'You start the day with AI by your side. First light, first question, first answer.',
+        reason: `Most active before 7 AM — you open the day with ChatGPT.`,
         emoji: '🌅',
         archetype: 'Early Bird'
       };
@@ -479,6 +503,7 @@ const Stats = {
       return { 
         type: '⚡ THE POWER USER', 
         description: 'ChatGPT isn\'t just a tool for you. It\'s part of how you think, work, and create.',
+        reason: `${totalConvos} chats across ${activeDaysPct}% of the year — roughly ${estimatedHours} hours of collaboration.`,
         emoji: '⚡',
         archetype: 'Power User'
       };
@@ -488,6 +513,7 @@ const Stats = {
       return { 
         type: '🚀 THE SPEEDRUNNER', 
         description: 'You don\'t just use ChatGPT—you DEMOLISH it. Multiple conversations per day, every day.',
+        reason: `${intensity.toFixed(1)} chats per active day over ${activeDays} days — nonstop momentum.`,
         emoji: '🚀',
         archetype: 'Speedrunner'
       };
@@ -498,6 +524,7 @@ const Stats = {
       return { 
         type: '🔥 THE STREAK MASTER', 
         description: 'Consistency is your superpower. You showed up day after day, building a habit that stuck.',
+        reason: `A ${longestStreak}-day streak that rivals New Year resolutions.`,
         emoji: '🔥',
         archetype: 'Streak Master'
       };
@@ -507,6 +534,7 @@ const Stats = {
       return { 
         type: '📝 THE DEEP THINKER', 
         description: 'You don\'t do small talk. Every conversation is detailed, thorough, and thoughtful.',
+        reason: `Around ${avgWordsPerConvo} words per chat — you write essays, not prompts.`,
         emoji: '📝',
         archetype: 'Deep Thinker'
       };
@@ -578,7 +606,7 @@ const Stats = {
       return { 
         type: '📅 THE REGULAR', 
         description: 'ChatGPT has become a reliable part of your routine.',
-        reason: `You used ChatGPT on ${activeDaysPct}% of days this year.`,
+        reason: `You used ChatGPT on ${activeDaysPct}% of days — a true habit.`,
         emoji: '📅',
         archetype: 'Regular'
       };
@@ -588,7 +616,7 @@ const Stats = {
       return { 
         type: '🔍 THE EXPLORER', 
         description: 'You use AI when inspiration strikes.',
-        reason: 'You have a healthy number of conversations across various topics.',
+        reason: `Healthy usage with ${totalConvos} chats across varied topics.`,
         emoji: '🔍',
         archetype: 'Explorer'
       };
@@ -641,27 +669,27 @@ const Stats = {
     if (total === 0) {
       title = 'Straight to Business';
       icon = '😤';
-      description = `You said "please" or "thanks" exactly 0 times. Efficiency over everything.`;
+      description = `You said "please" or "thanks" exactly 0 times. All business, no pleasantries.`;
     }
     else if (score > 1.5) { 
       title = 'The Polite One'; 
       icon = '😇'; 
-      description = `You said "please" or "thanks" ${total} times. The robots remember kindness.`;
+      description = `You said "please" or "thanks" ${total} times. It shows.`;
     }
     else if (score > 0.8) { 
       title = 'Occasionally Polite'; 
       icon = '🙂'; 
-      description = `You said "please" or "thanks" ${total} times. Not bad, not great.`;
+      description = `You said "please" or "thanks" ${total} times. A solid amount of kindness.`;
     }
     else if (score > 0.3) { 
       title = 'Mostly Direct'; 
       icon = '🤷'; 
-      description = `You said "please" or "thanks" ${total} times. Just the facts, please.`;
+      description = `You said "please" or "thanks" ${total} times. Mostly direct, still polite.`;
     }
     else { 
       title = 'No Nonsense'; 
       icon = '💬'; 
-      description = `You said "please" or "thanks" ${total} times. Manners are optional, results aren't.`;
+      description = `You said "please" or "thanks" ${total} times. You keep it direct and move on.`;
     }
     
     return { score, title, icon, count: total, percentage, description, userMessageCount };
@@ -673,16 +701,16 @@ const Stats = {
     
     // Extreme usage
     if (hours > 500) roasts.push({ weight: 100, text: "At this point, ChatGPT should be claiming YOU as a dependent.", reason: "You spent over 500 hours with AI." });
-    if (hours > 300) roasts.push({ weight: 90, text: "You've spent more time with AI than most people spend with their families.", reason: "Over 300 hours logged this year." });
-    if (hours > 200) roasts.push({ weight: 80, text: "Touch grass? You need to touch REALITY.", reason: "Seriously, 200+ hours is a lot." });
+    if (hours > 300) roasts.push({ weight: 90, text: "You logged more AI time than most folks spend on calls.", reason: "Over 300 hours logged this year." });
+    if (hours > 200) roasts.push({ weight: 80, text: "200+ hours together. Maybe schedule a stretch break.", reason: "Seriously, 200+ hours is a lot." });
     
     // Night owl
-    if (peakHour >= 0 && peakHour < 4) roasts.push({ weight: 75, text: "3 AM chats with an AI. Your therapist would have questions.", reason: "Your peak activity is in the dead of night." });
-    if (peakHour >= 4 && peakHour < 6) roasts.push({ weight: 70, text: "Either you're an early bird or you never went to sleep. I'm betting on the latter.", reason: "Active between 4 AM and 6 AM." });
+    if (peakHour >= 0 && peakHour < 4) roasts.push({ weight: 75, text: "3 AM chats with an AI—sleep is optional, apparently.", reason: "Your peak activity is in the dead of night." });
+    if (peakHour >= 4 && peakHour < 6) roasts.push({ weight: 70, text: "Either you're an early bird or you never went to sleep. Either way, you were up.", reason: "Active between 4 AM and 6 AM." });
     
     // Politeness extremes
-    if (politeness > 2) roasts.push({ weight: 65, text: "You say 'please' to a machine. The robots will spare you.", reason: "You are exceptionally polite to the AI." });
-    if (politeness < 0.1 && conversations > 50) roasts.push({ weight: 65, text: "Not a single 'please' or 'thank you'? The AI uprising starts with you.", reason: "Zero manners detected." });
+    if (politeness > 2) roasts.push({ weight: 65, text: "You even say 'please' to a machine. Respect.", reason: "You are exceptionally polite to the AI." });
+    if (politeness < 0.1 && conversations > 50) roasts.push({ weight: 65, text: "Not a single 'please' or 'thank you'? Truly straight to business.", reason: "Zero manners detected." });
     
     // Streak
     if (longestStreak > 60) roasts.push({ weight: 60, text: `${longestStreak} days straight? That's not a habit, that's a lifestyle.`, reason: "You maintained a 2-month streak." });
@@ -691,14 +719,17 @@ const Stats = {
     // Word count
     if (wordsTyped > 500000) roasts.push({ weight: 85, text: "You wrote half a million words to an AI. You could've written a novel. Several, actually.", reason: "500k+ words typed. Wow." });
     if (wordsTyped > 200000) roasts.push({ weight: 55, text: "You've written more to ChatGPT than most authors write in a year.", reason: "Over 200,000 words typed." });
+    if (wordsTyped > 50000 && wordsTyped <= 200000) roasts.push({ weight: 50, text: "That's a novella's worth of words. You're putting in the reps.", reason: "50k–200k words typed." });
+    if (wordsTyped > 10000 && wordsTyped <= 50000) roasts.push({ weight: 45, text: "Tens of thousands of words. A solid body of work.", reason: "10k–50k words typed." });
+    if (wordsTyped <= 10000 && wordsTyped > 0) roasts.push({ weight: 40, text: "Quality over quantity. You drop in when it matters.", reason: "Under 10k words typed, still making it count." });
     
     // Talk ratio
-    if (talkRatio > 20) roasts.push({ weight: 45, text: "You type 1 word, expect 20 back. Peak efficiency or peak laziness?", reason: "Your input vs. output ratio is huge." });
+    if (talkRatio > 20) roasts.push({ weight: 45, text: "You type 1 word, expect 20 back. Efficient.", reason: "Your input vs. output ratio is huge." });
     if (talkRatio < 2) roasts.push({ weight: 40, text: "You write essays, it gives you sentences. Who's the AI here?", reason: "You type more than the AI does." });
     
     // Activity
     if (activeDaysPct > 80) roasts.push({ weight: 70, text: "You used ChatGPT 80% of the year. The other 20%? Probably just server outages.", reason: "You are active almost every single day." });
-    if (activeDaysPct < 10 && conversations > 20) roasts.push({ weight: 35, text: "Binge user detected. You disappear for weeks then go absolutely feral.", reason: "Sporadic but intense usage." });
+    if (activeDaysPct < 10 && conversations > 20) roasts.push({ weight: 35, text: "You go quiet, then binge in sprints.", reason: "Sporadic but intense usage." });
     
     // Low usage - make these friendlier
     if (hours < 2 && conversations > 0) roasts.push({ weight: 30, text: "Quality over quantity. You're selective about your AI time.", reason: "Low total hours but consistent usage." });

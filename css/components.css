@@ -157,11 +157,16 @@
 }
 
 .link-subtle {
-  color: var(--accent-1);
-  text-decoration: underline;
+  color: #d6e4da;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(214, 228, 218, 0.45);
   cursor: pointer;
   position: relative;
   z-index: 100;
+}
+.link-subtle:hover {
+  color: #f4faf6;
+  border-bottom-color: rgba(244, 250, 246, 0.8);
 }
 
 /* PRIVACY BADGE */

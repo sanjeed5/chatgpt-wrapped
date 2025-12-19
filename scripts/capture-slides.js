@@ -5,6 +5,9 @@ const puppeteer = require('puppeteer');
 
 const OUTPUT_DIR = path.resolve(process.cwd(), 'slideshots');
 const INDEX_PATH = path.resolve(process.cwd(), 'index.html');
+const USER_DATA_DIR = path.resolve(process.cwd(), '.chrome-tmp');
+const HOME_DIR = path.resolve(process.cwd(), '.chrome-home');
+const CACHE_DIR = path.resolve(process.cwd(), '.chrome-cache');
 const CHROME_PATH = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
 async function ensureDir(dir) {
@@ -13,11 +16,26 @@ async function ensureDir(dir) {
 
 async function run() {
   await ensureDir(OUTPUT_DIR);
+  await ensureDir(USER_DATA_DIR);
+  await ensureDir(HOME_DIR);
+  await ensureDir(CACHE_DIR);
+
+  process.env.HOME = HOME_DIR;
+  process.env.XDG_CACHE_HOME = CACHE_DIR;
+  process.env.PUPPETEER_CACHE_DIR = CACHE_DIR;
+  process.env.CHROME_CRASHPAD_PIPE_NAME = '';
 
   const browser = await puppeteer.launch({
     headless: 'new',
-    executablePath: CHROME_PATH,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    userDataDir: USER_DATA_DIR,
+    executablePath: fs.existsSync(CHROME_PATH) ? CHROME_PATH : undefined,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-features=TranslateUI,AutoUpdate,Crashpad',
+      '--disable-crash-reporter',
+      `--user-data-dir=${USER_DATA_DIR}`,
+    ],
     defaultViewport: {
       width: 450,
       height: 800,

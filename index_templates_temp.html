@@ -22,10 +22,10 @@
   <template id="tpl-slide-intro">
     <section class="slide slide-gradient-1">
       <div class="slide-content centered">
-        <p class="eyebrow fade-in-up">The Overview</p>
+        <p class="eyebrow fade-in-up">Pulse Check</p>
         <h1 class="stat-huge fade-in-up delay-1" data-animate data-hook="year">2025</h1>
         <p class="stat-desc fade-in-up delay-2" data-hook="intro-desc">You really went for it.</p>
-        <p class="stat-sub fade-in-up delay-2">Here is the raw data:</p>
+        <p class="stat-sub fade-in-up delay-2" data-hook="intro-sub">Your cadence in numbers.</p>
         
         <div class="stats-row fade-in-up delay-3">
           <div class="stat-box">
@@ -37,11 +37,6 @@
             <span class="overview-icon">📅</span>
             <span class="val" data-hook="active-days">0</span>
             <span class="lbl">Active Days</span>
-          </div>
-          <div class="stat-box">
-            <span class="overview-icon">⏱️</span>
-            <span class="val" data-hook="total-hours">0</span>
-            <span class="lbl">Hours Spent</span>
           </div>
         </div>
       </div>
@@ -102,9 +97,10 @@
         <p class="stat-label" data-hook="streak-label">days straight</p>
         
         <div class="streak-heatmap-container" id="streak-heatmap">
-          <!-- Heatmap grid injected by JS -->
+          <div class="heatmap-months" data-hook="heatmap-months"></div>
+          <div class="heatmap-grid" data-hook="heatmap-grid" role="img" aria-label="Activity heatmap"></div>
         </div>
-        <p class="heatmap-label">Activity: Last 90 Days</p>
+        <p class="heatmap-label" data-hook="heatmap-range">Activity range</p>
         
         <p class="stat-desc streak-desc">Your longest streak. You showed up.</p>
       </div>
@@ -123,6 +119,23 @@
         </div>
         
         <p class="stat-desc">You know what you like.</p>
+      </div>
+    </section>
+  </template>
+
+  <template id="tpl-slide-politeness">
+    <section class="slide slide-gradient-2 slide-politeness">
+      <div class="slide-content centered">
+        <p class="eyebrow">Manners Audit</p>
+        <h1 class="stat-huge" data-hook="polite-count">0</h1>
+        <p class="stat-label" data-hook="polite-sub">please/thanks spotted</p>
+        
+        <div class="polite-meter" aria-hidden="true">
+          <div class="polite-meter-fill" data-hook="polite-meter"></div>
+        </div>
+        
+        <p class="stat-desc polite-desc" data-hook="polite-desc">Robots will remember this.</p>
+        <p class="polite-footnote" data-hook="polite-footnote">Percent of your messages with manners.</p>
       </div>
     </section>
   </template>
