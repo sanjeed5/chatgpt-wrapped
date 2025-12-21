@@ -122,124 +122,111 @@
 }
 #btn-get-wrapped:hover { background: #34d399; }
 
-/* UPLOAD FLOW */
-.upload-flow {
+/* UPLOAD BOX */
+.upload-box {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
+  padding: 24px;
+  border: 1px solid #333;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.02);
+  transition: all 0.2s;
 }
-.upload-flow.drag-over .check-item-upload .checkbox { 
+.upload-box.drag-over {
   border-color: var(--accent-1);
-  background: rgba(16, 185, 129, 0.1);
+  background: rgba(16, 185, 129, 0.05);
 }
 
-/* CHECKLIST */
-.checklist {
+.upload-guide {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
+  margin-bottom: 20px;
   width: 100%;
-  max-width: 280px;
 }
 
-.check-item {
+.guide-step {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border-radius: 12px;
+  gap: 10px;
+  font-size: 3.8cqw;
+  color: #999;
   text-decoration: none;
-  cursor: pointer;
-  transition: background 0.2s;
+  padding: 6px 0;
+  transition: color 0.2s;
 }
-.check-item:hover {
-  background: rgba(255,255,255,0.05);
+a.guide-step:hover {
+  color: #fff;
+}
+a.guide-step:hover .step-num {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
 }
 
-.checkbox {
+.step-num {
   width: 22px;
   height: 22px;
-  border-radius: 6px;
-  border: 2px solid #444;
-  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  color: #666;
+  font-size: 3cqw;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   transition: all 0.2s;
 }
-.checkbox::after {
-  content: '';
-  width: 10px;
-  height: 6px;
-  border-left: 2px solid transparent;
-  border-bottom: 2px solid transparent;
-  transform: rotate(-45deg) translate(1px, -1px);
-  transition: border-color 0.2s;
-}
 
-/* Checked state */
-.check-item.checked .checkbox {
-  background: var(--accent-1);
-  border-color: var(--accent-1);
-}
-.check-item.checked .checkbox::after {
-  border-left-color: black;
-  border-bottom-color: black;
-}
-.check-item.checked .check-text {
-  color: #666;
-  text-decoration: line-through;
-}
-
-.check-text {
+.guide-step-final {
   color: #ccc;
-  font-size: 4cqw;
-  transition: color 0.2s;
 }
-.check-item:hover .check-text {
-  color: #fff;
-}
-
-/* Upload button row */
-.check-item-upload {
-  margin-top: 6px;
-}
-.check-item-upload .checkbox {
-  border-color: #666;
-}
-.check-item-upload:hover .checkbox {
-  border-color: #fff;
+.guide-step-final .step-num {
+  background: rgba(255,255,255,0.12);
+  color: #888;
 }
 
-.btn-upload-text {
-  background: none;
+.btn-main {
+  background: white;
+  color: black;
   border: none;
-  color: #fff;
+  padding: 14px 32px;
+  border-radius: 50px;
+  font-weight: 700;
   font-size: 4cqw;
-  font-weight: 600;
   cursor: pointer;
-  padding: 0;
-  text-align: left;
+  transition: all 0.2s;
+  width: 100%;
 }
-.btn-upload-text:hover {
-  color: var(--accent-1);
+.btn-main:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(255,255,255,0.2);
 }
-
-.privacy-line {
-  margin-top: 24px;
-  font-size: 3cqw;
-  color: #555;
-  text-align: center;
+.btn-main:active {
+  transform: translateY(0);
 }
 
-.demo-footer-link {
-  color: #555;
+.demo-prompt {
+  margin-top: 16px;
+  font-size: 3.2cqw;
+  color: #666;
+}
+.demo-prompt a {
+  color: #888;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
-.demo-footer-link:hover {
-  color: #888;
+.demo-prompt a:hover {
+  color: #bbb;
+}
+
+.privacy-line {
+  margin-top: 20px;
+  font-size: 3cqw;
+  color: #555;
+  text-align: center;
 }
 
 /* PRIVACY BADGE */

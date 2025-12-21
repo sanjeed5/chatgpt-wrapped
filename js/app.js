@@ -87,18 +87,6 @@ const App = {
     // Demo
     this.dom.btnDemo.addEventListener('click', () => this.loadDemo());
 
-    // Checklist - mark steps as done when clicked
-    document.querySelectorAll('.check-item[data-step]').forEach(item => {
-      item.addEventListener('click', (e) => {
-        // If it's a link (steps 1 & 2), mark as checked after a short delay
-        if (item.tagName === 'A') {
-          setTimeout(() => {
-            item.classList.add('checked');
-          }, 300);
-        }
-      });
-    });
-
     // Drag & Drop
     this.dom.dropZone.addEventListener('click', (e) => {
       if (e.target.closest('button') || e.target.closest('a')) return;
@@ -145,10 +133,6 @@ const App = {
 
   async handleFile(file) {
     this.isDemo = false;
-    // Mark step 3 as checked
-    const step3 = document.querySelector('.check-item[data-step="3"]');
-    if (step3) step3.classList.add('checked');
-    
     this.goToSlide(1); // Loading slide
     
     // Show file size
