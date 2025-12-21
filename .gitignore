@@ -24,3 +24,7 @@ test-insights.js
 
 # Local artifacts
 slideshots/
+
+# Temp files
+.chrome-tmp/
+chatgpt-wrapped-react/
