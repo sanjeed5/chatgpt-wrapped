@@ -174,90 +174,114 @@ const SlideGenerator = {
       });
 
       if (streakSlide) {
-          const heatmapGrid = streakSlide.querySelector('[data-hook="heatmap-grid"]');
-          const heatmapMonths = streakSlide.querySelector('[data-hook="heatmap-months"]');
+          const heatmapContainer = streakSlide.querySelector('.streak-heatmap-container');
           const heatmapLabel = streakSlide.querySelector('[data-hook="heatmap-range"]');
 
-          if (heatmapGrid && heatmapMonths && stats.dailyActivityAllTime) {
-            const weeksToShow = 26; // roughly half-year view
-            const anchorDate = parseDateKey(stats.lastActiveDateKey) || new Date();
-            anchorDate.setHours(0, 0, 0, 0);
+          if (heatmapContainer && stats.dailyActivityAllTime) {
+            // Split year into two halves: Jan-Jun and Jul-Dec
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
 
-            const endDate = new Date(anchorDate);
-            endDate.setDate(anchorDate.getDate() + (6 - anchorDate.getDay())); // snap to end of week (Saturday)
-            const startDate = new Date(endDate);
-            startDate.setDate(endDate.getDate() - (weeksToShow * 7) + 1);
+            // Get streak range for highlighting
+            const streakStartKey = stats.longestStreakRange?.startKey;
+            const streakEndKey = stats.longestStreakRange?.endKey;
+            const isInStreak = (dateKey) => {
+              if (!streakStartKey || !streakEndKey) return false;
+              return dateKey >= streakStartKey && dateKey <= streakEndKey;
+            };
 
-            const daysData = [];
+            // Calculate max count for consistent coloring
             let maxCount = 0;
-            const totalDays = weeksToShow * 7;
-
-            for (let i = 0; i < totalDays; i++) {
-              const current = new Date(startDate);
-              current.setDate(startDate.getDate() + i);
-              const dateKey = toDateKey(current);
-              const count = stats.dailyActivityAllTime[dateKey] || 0;
-              const isFuture = current > anchorDate;
-              if (!isFuture) maxCount = Math.max(maxCount, count);
-              daysData.push({ date: current, dateKey, count, isFuture });
-            }
-
-            heatmapGrid.innerHTML = '';
-            heatmapMonths.innerHTML = '';
-            heatmapGrid.style.setProperty('--weeks', weeksToShow);
-            heatmapMonths.style.setProperty('--weeks', weeksToShow);
-
-            // Month labels
-            let lastMonth = null;
-            for (let w = 0; w < weeksToShow; w++) {
-              const weekStart = new Date(startDate);
-              weekStart.setDate(startDate.getDate() + w * 7);
-              const monthIdx = weekStart.getMonth();
-              if (weekStart.getDate() <= 7 && monthIdx !== lastMonth) {
-                const label = document.createElement('span');
-                label.className = 'month-label';
-                label.style.gridColumn = `${w + 1}`;
-                label.textContent = monthName(monthIdx);
-                heatmapMonths.appendChild(label);
-                lastMonth = monthIdx;
-              }
-            }
-
-            // Cells
-            daysData.forEach(({ date, count, isFuture }, idx) => {
-              const cell = document.createElement('div');
-              cell.className = 'heatmap-cell';
-              const weekIdx = Math.floor(idx / 7);
-              const dayOfWeek = idx % 7;
-              cell.style.gridColumn = `${weekIdx + 1}`;
-              cell.style.gridRow = `${dayOfWeek + 1}`;
-
-              if (isFuture) {
-                cell.classList.add('future');
-              } else if (count > 0) {
-                const intensity = maxCount === 0 ? 1 : Math.ceil((count / maxCount) * 4);
-                cell.classList.add(`level-${Math.min(intensity, 4)}`);
-                cell.title = `${monthName(date.getMonth())} ${date.getDate()}, ${date.getFullYear()} · ${count} conversation${count === 1 ? '' : 's'}`;
-                cell.style.animation = `fade-in 0.5s ease-out ${Math.random()}s backwards`;
-              } else {
-                cell.title = `${monthName(date.getMonth())} ${date.getDate()}, ${date.getFullYear()} · 0 conversations`;
-              }
-
-              heatmapGrid.appendChild(cell);
+            Object.entries(stats.dailyActivityAllTime).forEach(([key, count]) => {
+              if (key.startsWith(String(stats.year))) maxCount = Math.max(maxCount, count);
             });
 
-            if (heatmapLabel) {
-              if (stats.longestStreakRange?.startShort && stats.longestStreakRange?.endShort) {
-                heatmapLabel.textContent = `${stats.longestStreakRange.startShort} – ${stats.longestStreakRange.endShort}`;
-              } else {
-                const includeStartYear = startDate.getFullYear() !== anchorDate.getFullYear();
-                const startLabel = includeStartYear
-                  ? `${formatShortDate(startDate)}, ${startDate.getFullYear()}`
-                  : formatShortDate(startDate);
-                const endLabel = `${formatShortDate(anchorDate)}, ${anchorDate.getFullYear()}`;
-                heatmapLabel.textContent = `${startLabel} – ${endLabel}`;
+            // Clear container and build two halves
+            heatmapContainer.innerHTML = '';
+
+            const halves = [
+              { startMonth: 0, endMonth: 5, label: 'Jan–Jun' },
+              { startMonth: 6, endMonth: 11, label: 'Jul–Dec' }
+            ];
+
+            halves.forEach(({ startMonth, endMonth }) => {
+              const halfStart = new Date(stats.year, startMonth, 1);
+              const halfEnd = new Date(stats.year, endMonth + 1, 0); // Last day of end month
+              
+              // Snap to week boundaries
+              const startDate = new Date(halfStart);
+              startDate.setDate(halfStart.getDate() - halfStart.getDay());
+              const endDate = new Date(halfEnd);
+              endDate.setDate(halfEnd.getDate() + (6 - halfEnd.getDay()));
+
+              const totalDays = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+              const weeksCount = Math.ceil(totalDays / 7);
+
+              // Create half container
+              const halfDiv = document.createElement('div');
+              halfDiv.className = 'heatmap-half';
+
+              // Month labels
+              const monthsDiv = document.createElement('div');
+              monthsDiv.className = 'heatmap-half-months';
+              monthsDiv.style.gridTemplateColumns = `repeat(${weeksCount}, 1fr)`;
+              
+              let lastMonth = -1;
+              for (let w = 0; w < weeksCount; w++) {
+                const weekStart = new Date(startDate);
+                weekStart.setDate(startDate.getDate() + w * 7);
+                const month = weekStart.getMonth();
+                if (month >= startMonth && month <= endMonth && month !== lastMonth) {
+                  const label = document.createElement('span');
+                  label.textContent = monthName(month);
+                  label.style.gridColumn = `${w + 1}`;
+                  monthsDiv.appendChild(label);
+                  lastMonth = month;
+                }
               }
-            }
+              halfDiv.appendChild(monthsDiv);
+
+              // Grid
+              const gridDiv = document.createElement('div');
+              gridDiv.className = 'heatmap-half-grid';
+              gridDiv.style.gridTemplateColumns = `repeat(${weeksCount}, 1fr)`;
+
+              for (let w = 0; w < weeksCount; w++) {
+                for (let d = 0; d < 7; d++) {
+                  const current = new Date(startDate);
+                  current.setDate(startDate.getDate() + w * 7 + d);
+                  const dateKey = toDateKey(current);
+                  const count = stats.dailyActivityAllTime[dateKey] || 0;
+                  const isFuture = current > today;
+                  const isOutsideHalf = current < halfStart || current > halfEnd;
+                  const inStreak = isInStreak(dateKey);
+
+                  const cell = document.createElement('div');
+                  cell.className = 'heatmap-cell';
+                  cell.style.gridColumn = `${w + 1}`;
+                  cell.style.gridRow = `${d + 1}`;
+
+                  if (isOutsideHalf) {
+                    cell.classList.add('outside-year');
+                  } else if (isFuture) {
+                    cell.classList.add('future');
+                  } else if (count > 0) {
+                    const intensity = Math.ceil((count / maxCount) * 4);
+                    cell.classList.add(`level-${Math.min(intensity, 4)}`);
+                    if (inStreak) {
+                      cell.classList.add('streak');
+                    }
+                    cell.title = `${monthName(current.getMonth())} ${current.getDate()} · ${count}${inStreak ? ' (streak)' : ''}`;
+                  }
+
+                  gridDiv.appendChild(cell);
+                }
+              }
+              halfDiv.appendChild(gridDiv);
+              heatmapContainer.appendChild(halfDiv);
+            });
+
+            if (heatmapLabel) heatmapLabel.style.display = 'none';
           }
       }
     }

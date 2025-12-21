@@ -56,42 +56,35 @@
     
     <!-- 1. UPLOAD SLIDE -->
     <section class="slide active" id="slide-upload">
-      <div class="slide-content">
+      <div class="slide-content upload-slide-content">
 
-        
-        <div class="hero-text-group">
-          <div class="brand-title">ChatGPT Wrapped</div>
-          <h1 class="title-huge" data-hook="year">2025</h1>
-          <p class="subtitle">See your AI story unfold.</p>
-        </div>
+        <div class="upload-main">
+          <div class="hero-text-group">
+            <div class="brand-title">ChatGPT Wrapped</div>
+            <h1 class="title-huge" data-hook="year">2025</h1>
+            <p class="subtitle">Discover how you really use ChatGPT.</p>
+          </div>
 
-        <div class="upload-area" id="drop-zone" role="button" tabindex="0" aria-label="Upload conversations file" aria-describedby="upload-instruction upload-hint">
-          <div class="icon" aria-hidden="true">📁</div>
-          <p class="upload-instruction" id="upload-instruction">Drop your ChatGPT export <strong>.zip</strong></p>
-          
-          <div class="upload-hint-container">
-            <p class="upload-hint" id="upload-hint">
-              <a href="https://chatgpt.com/#settings/DataControls" target="_blank" class="link-subtle">Export your data</a>
-              → <a href="https://mail.google.com/mail/u/0/#advanced-search/from=noreply%40tm.openai.com&subject=ChatGPT+-+Your+data+export+is+ready&sizeoperator=s_sl&sizeunit=s_smb&query=from%3A(noreply%40tm.openai.com)" target="_blank" class="link-subtle">Download the .zip</a>
+          <div class="upload-box" id="drop-zone" role="button" tabindex="0" aria-label="Upload conversations file">
+            <p class="upload-guide">
+              <a href="https://chatgpt.com/#settings/DataControls" target="_blank">Export your data</a>
+              <span class="guide-arrow">→</span>
+              <a href="https://mail.google.com/mail/u/0/#advanced-search/from=noreply%40tm.openai.com&subject=ChatGPT+-+Your+data+export+is+ready&sizeoperator=s_sl&sizeunit=s_smb&query=from%3A(noreply%40tm.openai.com)" target="_blank">grab .zip from email</a>
+              <span class="guide-arrow">→</span>
+              <span class="guide-final">upload below</span>
             </p>
+            
+            <button id="btn-select" class="btn-main" type="button">Select .zip file</button>
+            <input type="file" id="file-input" hidden accept=".json,.zip">
+            
+            <p class="demo-prompt">Just curious? <a href="#" id="btn-demo">Try with sample data</a></p>
           </div>
-
-          <button id="btn-select" class="btn-primary" type="button">Select File</button>
-          <button id="btn-demo" class="btn-secondary-alt" type="button">Try Demo</button>
-          <input type="file" id="file-input" hidden accept=".json,.zip" aria-describedby="upload-instruction upload-hint">
-        </div>
-        
-        <div class="privacy-badge">
-          <span class="privacy-icon">🔒</span>
-          <div class="privacy-text">
-            <strong>100% Private</strong>
-            <span>All processing happens in your browser.</span>
-          </div>
+          
+          <p class="privacy-line">🔒 100% private · runs in your browser</p>
         </div>
 
         <div class="slide-footer">
-          <p>Not affiliated with OpenAI</p>
-          <p>Made by <a href="https://x.com/sanjeed_i" target="_blank">Sanjeed</a></p>
+          <p>Made by <a href="https://x.com/sanjeed_i" target="_blank">Sanjeed</a> · Not affiliated with OpenAI</p>
         </div>
       </div>
     </section>
