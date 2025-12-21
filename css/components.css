@@ -159,12 +159,16 @@
 }
 a.guide-step {
   color: #bbb;
+}
+a.guide-step .step-text {
   text-decoration: underline;
   text-decoration-color: #555;
   text-underline-offset: 3px;
 }
 a.guide-step:hover {
   color: #fff;
+}
+a.guide-step:hover .step-text {
   text-decoration-color: #888;
 }
 a.guide-step:hover .step-num {
