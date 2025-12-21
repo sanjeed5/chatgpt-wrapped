@@ -286,11 +286,11 @@
   gap: 8px;
   justify-items: center;
   margin: 4vh auto 2vh;
+  width: 100%;
 }
 .heatmap-months {
   display: grid;
-  grid-template-columns: repeat(var(--weeks, 26), 12px);
-  gap: 3px;
+  grid-template-columns: repeat(var(--weeks, 26), var(--heatmap-cell));
   font-size: 10px;
   color: var(--text-grey);
   text-transform: uppercase;
@@ -301,18 +301,20 @@
 }
 .heatmap-grid {
   display: grid;
-  grid-template-columns: repeat(var(--weeks, 26), 12px);
-  grid-template-rows: repeat(7, 12px);
-  gap: 3px;
+  grid-template-columns: repeat(var(--weeks, 26), var(--heatmap-cell));
+  grid-template-rows: repeat(7, var(--heatmap-cell));
   justify-content: start;
 }
 .heatmap-months,
 .heatmap-grid {
-  width: calc(var(--weeks, 26) * 12px + (var(--weeks, 26) - 1) * 3px);
+  --heatmap-gap: clamp(1px, 0.6cqw, 3px);
+  --heatmap-cell: calc((100% - (var(--weeks, 26) - 1) * var(--heatmap-gap)) / var(--weeks, 26));
+  gap: var(--heatmap-gap);
+  width: 100%;
 }
 .heatmap-cell {
-  width: 12px;
-  height: 12px;
+  width: 100%;
+  height: 100%;
   border-radius: 2px;
   background: rgba(255,255,255,0.08);
 }
