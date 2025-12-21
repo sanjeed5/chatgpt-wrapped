@@ -1,0 +1,59 @@
+/* Google Fonts - must come before @import "tailwindcss" */
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@500&display=swap');
+
+@import "tailwindcss";
+
+/* Custom CSS Variables */
+@theme {
+  --color-bg-dark: #000;
+  --color-text-white: #fff;
+  --color-text-grey: #888;
+  --color-accent-1: #10b981;
+  --color-accent-2: #3b82f6;
+  
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-serif: 'Instrument Serif', Georgia, serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* Base styles */
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-bg-dark text-text-white m-0 p-0 min-h-screen overflow-hidden;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+/* Custom utility classes */
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(to bottom, #fff, #666);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .text-gradient-accent {
+    background: linear-gradient(to right, #10b981, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .slide-gradient-1 {
+    background: radial-gradient(circle at top right, #1e1b4b 0%, #000 60%);
+  }
+  
+  .slide-gradient-2 {
+    background: linear-gradient(180deg, #000 0%, #064e3b 100%);
+  }
+}
