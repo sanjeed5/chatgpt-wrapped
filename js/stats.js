@@ -572,9 +572,11 @@ const Stats = {
   },
 
   calculatePoliteness(conversations) {
-    let pleaseCount = 0;
-    let thanksCount = 0;
+    let politeCount = 0;
     let userMessageCount = 0;
+    
+    // Word boundary regex for short terms (to avoid false positives like "ty" in "party")
+    const shortTermRegex = /\b(pls|plz|thx|ty|tysm)\b/gi;
     
     for (const convo of conversations) {
       const mapping = convo.mapping || {};
@@ -583,13 +585,22 @@ const Stats = {
         if (msg && msg.author?.role === 'user' && msg.content?.parts) {
           userMessageCount++;
           const text = msg.content.parts.join(' ').toLowerCase();
-          if (text.includes('please')) pleaseCount++;
-          if (text.includes('thank')) thanksCount++;
+          
+          // Long terms - simple includes is fine (no false positive risk)
+          if (text.includes('please')) politeCount++;
+          if (text.includes('thank')) politeCount++;  // catches thanks, thank you, thankful
+          if (text.includes('appreciate')) politeCount++;  // catches appreciated, appreciation
+          if (text.includes('grateful')) politeCount++;
+          if (text.includes('kindly')) politeCount++;
+          
+          // Short terms - need word boundaries to avoid false positives
+          const shortMatches = text.match(shortTermRegex);
+          if (shortMatches) politeCount += shortMatches.length;
         }
       }
     }
     
-    const total = pleaseCount + thanksCount;
+    const total = politeCount;
     const percentage = userMessageCount > 0 ? Math.round((total / userMessageCount) * 100) : 0;
     const score = total / (conversations.length || 1);
     
