@@ -525,8 +525,15 @@ const App = {
   shareOnX() {
     Analytics.track('share-x');
     const year = this.stats?.year || new Date().getFullYear();
+    const mannersCount = this.stats?.politeness?.count || 0;
     const messages = this.stats?.userMessages || 0;
-    const text = encodeURIComponent(`My ChatGPT Wrapped ${year}: ${messages.toLocaleString()} messages this year! 🤖✨\n\nCheck out yours at gptwrapped.sanjeed.in`);
+    
+    let text;
+    if (mannersCount > 0) {
+      text = encodeURIComponent(`My ChatGPT Wrapped ${year}: I said please/thank you ${mannersCount.toLocaleString()} times! 🤖😇\n\nCheck out yours at gptwrapped.sanjeed.in`);
+    } else {
+      text = encodeURIComponent(`My ChatGPT Wrapped ${year}: ${messages.toLocaleString()} messages this year! 🤖✨\n\nCheck out yours at gptwrapped.sanjeed.in`);
+    }
     const url = `https://twitter.com/intent/tweet?text=${text}`;
     window.open(url, '_blank', 'width=550,height=420');
   },
