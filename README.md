@@ -87,12 +87,13 @@ This is a **static website** with **no backend**. Here's how we ensure your priv
 
 ```
 ├── index.html      # Main page with upload UI
-├── styles.css      # All styling
+├── css/            # Styling (base, components, slides)
 └── js/
     ├── parser.js   # ZIP/JSON file reading
     ├── stats.js    # Statistics computation
     ├── slides.js   # Slide HTML generation
-    └── app.js      # Main application logic
+    ├── app.js      # Main application logic
+    └── demo-data.js # Sample data for demo mode
 ```
 
 ### What each file does
