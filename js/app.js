@@ -370,7 +370,6 @@ const App = {
     const bar = this.progressBars[this.currentSlideIndex];
     if (bar) {
       const fill = bar.querySelector('.progress-fill');
-      const currentWidth = fill.style.width; // keep current? no, reset handled by goToSlide
       fill.style.transition = 'none';
     }
   },
@@ -417,7 +416,6 @@ const App = {
   },
 
   downloadSummary() {
-    const card = document.getElementById('summary-card');
     const btn = document.getElementById('btn-download');
     const originalText = btn.textContent;
     btn.textContent = 'Generating...';
@@ -425,14 +423,98 @@ const App = {
     
     Analytics.track('download-image');
     
-    html2canvas(card, { backgroundColor: '#000000' }).then(canvas => {
+    // Build a screenshot-ready element with hardcoded pixel values
+    // (html2canvas doesn't support cqw units or CSS variables)
+    const stats = this.stats || {};
+    const year = stats.year || new Date().getFullYear();
+    const messages = (stats.userMessages || 0).toLocaleString();
+    const activeDays = (stats.activeDays || 0).toLocaleString();
+    const words = stats.wordsTypedFormatted || '0';
+    const streak = (stats.longestStreak || 0).toLocaleString();
+    const persona = (stats.personality?.type || 'Explorer').replace(/^[^\w]+\s*/, '').trim();
+    const mannersCount = (stats.politeness?.count || 0).toLocaleString();
+    const mannersIcon = stats.politeness?.icon || '😇';
+    
+    // Create container with fixed pixel dimensions
+    const container = document.createElement('div');
+    container.id = 'download-card';
+    container.style.cssText = `
+      position: fixed;
+      left: -9999px;
+      top: 0;
+      width: 400px;
+      height: 500px;
+      background: #000;
+      border: 4px solid #fff;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #fff;
+      box-sizing: border-box;
+    `;
+    
+    container.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #333; padding-bottom: 12px; margin-bottom: 12px;">
+        <span style="font-size: 18px; font-weight: 900; text-transform: uppercase; letter-spacing: -0.02em;">ChatGPT Wrapped</span>
+        <span style="font-size: 20px; font-weight: 900; color: #fff; background: #000; padding: 2px 8px; border: 1px solid #fff;">${year}</span>
+      </div>
+      
+      <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;">
+        <div style="text-align: center;">
+          <div style="font-size: 72px; font-weight: 900; line-height: 0.9; color: #10b981; text-shadow: 2px 2px 0px #fff;">${messages}</div>
+          <div style="font-size: 14px; color: #fff; text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em; margin-top: 8px; background: #333; padding: 4px 10px; display: inline-block;">Messages</div>
+        </div>
+        
+        <div style="text-align: center; background: #fff; color: #000; border: 2px solid #fff; padding: 6px 16px; border-radius: 50px; font-weight: 700; transform: rotate(-2deg);">
+          <span style="font-size: 16px; color: #000;">${persona}</span>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%;">
+          <div style="text-align: center; border: 1px solid #333; padding: 10px 5px; background: #111;">
+            <span style="display: block; font-size: 20px; font-weight: 700; color: #fff;">${activeDays}</span>
+            <span style="display: block; font-size: 9px; color: #999; text-transform: uppercase; margin-top: 4px;">Active Days</span>
+          </div>
+          <div style="text-align: center; border: 1px solid #333; padding: 10px 5px; background: #111;">
+            <span style="display: block; font-size: 20px; font-weight: 700; color: #fff;">${words}</span>
+            <span style="display: block; font-size: 9px; color: #999; text-transform: uppercase; margin-top: 4px;">Words</span>
+          </div>
+          <div style="text-align: center; border: 1px solid #333; padding: 10px 5px; background: #111;">
+            <span style="display: block; font-size: 20px; font-weight: 700; color: #fff;">${streak}</span>
+            <span style="display: block; font-size: 9px; color: #999; text-transform: uppercase; margin-top: 4px;">Day Streak</span>
+          </div>
+        </div>
+        
+        <p style="font-size: 12px; color: #999; font-style: italic; margin: 0;">You said please/thanks <span style="color: #10b981; font-weight: 700; font-style: normal;">${mannersCount}</span> times ${mannersIcon}</p>
+      </div>
+      
+      <div style="text-align: right; font-size: 11px; color: #666; font-family: 'JetBrains Mono', monospace; padding-top: 10px; border-top: 2px solid #333;">gptwrapped.sanjeed.in</div>
+    `;
+    
+    document.body.appendChild(container);
+    
+    html2canvas(container, {
+      backgroundColor: '#000000',
+      scale: 2,
+      useCORS: true,
+      logging: false,
+    }).then(canvas => {
+      document.body.removeChild(container);
+      
       const link = document.createElement('a');
-      const year = this.stats?.year || new Date().getFullYear();
       link.download = `chatgpt-wrapped-${year}.png`;
-      link.href = canvas.toDataURL();
+      link.href = canvas.toDataURL('image/png');
       link.click();
       
       btn.textContent = '✓ Downloaded!';
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }, 2000);
+    }).catch(err => {
+      console.error('Download failed:', err);
+      if (container.parentNode) document.body.removeChild(container);
+      btn.textContent = 'Failed - try again';
       setTimeout(() => {
         btn.textContent = originalText;
         btn.disabled = false;
@@ -443,7 +525,8 @@ const App = {
   shareOnX() {
     Analytics.track('share-x');
     const year = this.stats?.year || new Date().getFullYear();
-    const text = encodeURIComponent(`My ChatGPT Wrapped ${year}: ${this.stats?.conversations || 0} conversations this year! 🤖✨\n\nCheck out yours at gptwrapped.sanjeed.in`);
+    const messages = this.stats?.userMessages || 0;
+    const text = encodeURIComponent(`My ChatGPT Wrapped ${year}: ${messages.toLocaleString()} messages this year! 🤖✨\n\nCheck out yours at gptwrapped.sanjeed.in`);
     const url = `https://twitter.com/intent/tweet?text=${text}`;
     window.open(url, '_blank', 'width=550,height=420');
   },
