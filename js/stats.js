@@ -417,14 +417,7 @@ const Stats = {
   },
 
   getTopModel(conversations) {
-    const models = {};
-    for (const convo of conversations) {
-      const model = convo.default_model_slug;
-      if (model && model !== 'auto') {
-        const normalized = this.normalizeModelName(model);
-        models[normalized] = (models[normalized] || 0) + 1;
-      }
-    }
+    const models = this.countModelsByMessage(conversations);
     let topModel = 'GPT-4';
     let maxCount = 0;
     for (const [model, count] of Object.entries(models)) {
@@ -437,18 +430,36 @@ const Stats = {
   },
 
   getTopModels(conversations, limit = 3) {
-    const models = {};
-    for (const convo of conversations) {
-      const model = convo.default_model_slug;
-      if (model && model !== 'auto') {
-        const normalized = this.normalizeModelName(model);
-        models[normalized] = (models[normalized] || 0) + 1;
-      }
-    }
+    const models = this.countModelsByMessage(conversations);
     return Object.entries(models)
       .sort((a, b) => b[1] - a[1])
       .slice(0, limit)
       .map(([model, count]) => ({ model, count }));
+  },
+
+  countModelsByMessage(conversations) {
+    const models = {};
+    for (const convo of conversations) {
+      const mapping = convo.mapping || {};
+      for (const msgData of Object.values(mapping)) {
+        const msg = msgData.message;
+        if (!msg) continue;
+        
+        // Only count assistant messages (the model's responses)
+        if (msg.author?.role !== 'assistant') continue;
+        
+        // Skip hidden messages
+        if (msg.metadata?.is_visually_hidden_from_conversation) continue;
+        
+        // Get model from message metadata, fall back to conversation default
+        const model = msg.metadata?.model_slug || convo.default_model_slug;
+        if (model && model !== 'auto') {
+          const normalized = this.normalizeModelName(model);
+          models[normalized] = (models[normalized] || 0) + 1;
+        }
+      }
+    }
+    return models;
   },
 
   normalizeModelName(slug) {
@@ -799,10 +810,12 @@ const Stats = {
 
   getDaysInYear(year) {
     const now = new Date();
-    const endOfYear = new Date(year, 11, 31);
+    // Use end of Dec 31 (23:59:59.999) to include the full last day
+    const endOfYear = new Date(year, 11, 31, 23, 59, 59, 999);
     const referenceDate = now < endOfYear ? now : endOfYear;
     const startOfYear = new Date(year, 0, 1);
-    return Math.ceil((referenceDate - startOfYear) / (1000 * 60 * 60 * 24));
+    // Add 1 to include the start day in the count
+    return Math.floor((referenceDate - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
   },
 
   getLatestYear(conversations) {
