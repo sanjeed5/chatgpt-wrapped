@@ -2,6 +2,23 @@
  * ChatGPT Wrapped V3 - Story Logic
  */
 
+// Analytics helper - tracks events to both Umami and GoatCounter
+const Analytics = {
+  track(eventName, data = {}) {
+    // Umami
+    if (typeof umami !== 'undefined') {
+      umami.track(eventName, data);
+    }
+    // GoatCounter
+    if (typeof goatcounter !== 'undefined' && goatcounter.count) {
+      goatcounter.count({
+        path: `event/${eventName}`,
+        event: true,
+      });
+    }
+  }
+};
+
 const App = {
   currentSlideIndex: 0,
   slides: [],
@@ -150,6 +167,7 @@ const App = {
       const parsePromise = Parser.parse(file, () => {});
       
       const [_, conversations] = await Promise.all([minLoadingTime, parsePromise]);
+      Analytics.track('file-uploaded', { size_mb: sizeInMB });
       this.processData(conversations);
     } catch (err) {
       this.showError(err.message);
@@ -158,6 +176,7 @@ const App = {
 
   async loadDemo() {
     this.isDemo = true;
+    Analytics.track('demo-clicked');
     this.goToSlide(1); // Loading
     setTimeout(() => {
       try {
@@ -268,6 +287,7 @@ const App = {
     const isSummarySlide = curr.querySelector('.summary-card');
     if (isSummarySlide) {
       setTimeout(() => this.triggerConfetti(70), 200);
+      Analytics.track('story-completed', { is_demo: this.isDemo });
     }
     
     // Announce to screen readers
@@ -403,6 +423,8 @@ const App = {
     btn.textContent = 'Generating...';
     btn.disabled = true;
     
+    Analytics.track('download-image');
+    
     html2canvas(card, { backgroundColor: '#000000' }).then(canvas => {
       const link = document.createElement('a');
       const year = this.stats?.year || new Date().getFullYear();
@@ -419,6 +441,7 @@ const App = {
   },
 
   shareOnX() {
+    Analytics.track('share-x');
     const year = this.stats?.year || new Date().getFullYear();
     const text = encodeURIComponent(`My ChatGPT Wrapped ${year}: ${this.stats?.conversations || 0} conversations this year! 🤖✨\n\nCheck out yours at gptwrapped.sanjeed.in`);
     const url = `https://twitter.com/intent/tweet?text=${text}`;
