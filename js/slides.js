@@ -82,8 +82,8 @@ const SlideGenerator = {
 
     const introSlide = createSlide('tpl-slide-intro', {
       year: stats.year,
-      'total-convos': stats.userMessages,
-      'active-days': stats.activeDays,
+      'total-convos': formatNumber(stats.userMessages),
+      'active-days': formatNumber(stats.activeDays),
       'intro-desc': introDesc,
       'intro-sub': introSub
     });
@@ -114,8 +114,8 @@ const SlideGenerator = {
       const growthSlide = createSlide('tpl-slide-growth', {
         'growth-multiple': growthMultiple,
         'growth-label': growthLabel,
-        'this-year': stats.userMessages,
-        'last-year': stats.previousYearUserMessages,
+        'this-year': formatNumber(stats.userMessages),
+        'last-year': formatNumber(stats.previousYearUserMessages),
         'current-year-label': stats.year,
         'previous-year-label': stats.year - 1,
         'growth-message': message
@@ -160,7 +160,7 @@ const SlideGenerator = {
 
       createSlide('tpl-slide-biggest-month', {
         'biggest-month': stats.biggestMonth.month,
-        'month-count': stats.biggestMonth.count,
+        'month-count': formatNumber(stats.biggestMonth.count),
         'month-desc': monthDesc
       });
     }
@@ -168,7 +168,7 @@ const SlideGenerator = {
     // 5. Longest Streak
     if (stats.longestStreak > 0) {
       const streakSlide = createSlide('tpl-slide-streak', {
-        'streak-days': stats.longestStreak,
+        'streak-days': formatNumber(stats.longestStreak),
         'streak-label': stats.longestStreak === 1 ? 'day' : 'days straight'
       });
 
@@ -421,18 +421,19 @@ const SlideGenerator = {
     }
 
     // 10. Summary
-    const summaryPersonaRaw = stats.personality.archetype || stats.personality.type || '';
-    const summaryPersona = summaryPersonaRaw.replace(/^[^\w]+\s*/, '').trim();
+    // Use same persona derivation as persona slide for consistency
+    const summaryPersonaTitle = (stats.personality.type || '').replace(/^[^\w]+\s*/, '').trim();
+    const summaryPersona = summaryPersonaTitle || stats.personality.archetype || 'Explorer';
     const mannersCount = stats.politeness?.count || 0;
     const mannersIcon = stats.politeness?.icon || '😇';
     const summarySlide = createSlide('tpl-slide-summary', {
       year: stats.year,
-      'total-convos': stats.userMessages,
-      'active-days': stats.activeDays,
+      'total-convos': formatNumber(stats.userMessages),
+      'active-days': formatNumber(stats.activeDays),
       'words-short': stats.wordsTypedFormatted,
-      'streak-days': stats.longestStreak || 0,
+      'streak-days': formatNumber(stats.longestStreak || 0),
       'persona-type': summaryPersona,
-      'manners-count': mannersCount.toLocaleString('en-US'),
+      'manners-count': formatNumber(mannersCount),
       'manners-icon': mannersIcon
     });
 
