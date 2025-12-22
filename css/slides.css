@@ -529,7 +529,7 @@
 .card-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #333; padding-bottom: 15px; }
 .card-logo { font-size: 5cqw; font-weight: 900; text-transform: uppercase; letter-spacing: -0.02em; line-height: 1; }
 .card-year { font-size: 6cqw; font-weight: 900; color: white; background: black; padding: 2px 8px; border: 1px solid white; }
-.card-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 0; gap: 15px; }
+.card-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 0; gap: 10px; }
 .hero-stat { text-align: center; }
 .hero-val { 
   font-size: 24cqw; 
@@ -545,13 +545,13 @@
   100% { transform: scale(1); opacity: 1; }
 }
 .hero-label { font-size: 4cqw; color: white; text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em; margin-top: 8px; background: #333; padding: 4px 10px; display: inline-block; }
-.summary-persona-badge { text-align: center; background: white; color: black; border: 2px solid white; padding: 8px 20px; border-radius: 50px; margin: 10px 0; font-weight: 700; transform: rotate(-2deg); }
+.summary-persona-badge { text-align: center; background: white; color: black; border: 2px solid white; padding: 6px 16px; border-radius: 50px; margin: 6px 0; font-weight: 700; transform: rotate(-2deg); }
 .summary-persona-badge span { font-size: 5cqw; color: black; }
 .summary-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
 .mini-stat { text-align: center; border: 1px solid #333; padding: 10px 5px; background: #111; }
 .mini-val { display: block; font-size: 6cqw; font-weight: 700; color: white; }
 .mini-lbl { display: block; font-size: 2.5cqw; color: #999; text-transform: uppercase; margin-top: 4px; }
-.summary-manners { font-size: 3.5cqw; color: #999; font-style: italic; margin-top: 10px; }
+.summary-manners { font-size: 3.5cqw; color: #999; font-style: italic; margin-top: 6px; }
 .summary-manners span[data-hook="manners-count"] { color: var(--accent-1); font-weight: 700; font-style: normal; }
 .card-footer { text-align: right; font-size: 3cqw; color: #555; font-family: var(--font-mono); padding-top: 15px; border-top: 2px solid #333; }
 .share-prompt { font-size: 4cqw; color: var(--text-grey); font-family: var(--font-serif); font-style: italic; margin-bottom: 15px; text-align: center; }
@@ -585,11 +585,9 @@
 }
 @keyframes glow-pulse {
   0%, 100% { 
-    text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
     filter: brightness(1);
   }
   50% { 
-    text-shadow: 0 0 40px rgba(16, 185, 129, 0.6), 0 0 60px rgba(16, 185, 129, 0.3);
     filter: brightness(1.1);
   }
 }
