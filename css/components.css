@@ -241,6 +241,23 @@ a.guide-step:hover .step-num {
   text-align: center;
 }
 
+.verify-line {
+  margin-top: 8px;
+  font-size: 2.8cqw;
+  color: #666;
+  text-align: center;
+}
+.verify-line a {
+  color: #777;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: #444;
+}
+.verify-line a:hover {
+  color: #aaa;
+  text-decoration-color: #666;
+}
+
 /* PRIVACY BADGE */
 .privacy-badge {
   display: flex;

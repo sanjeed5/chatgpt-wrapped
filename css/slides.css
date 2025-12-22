@@ -11,7 +11,8 @@
   padding: 0;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  transform: translateY(10px) scale(0.98);
   background: var(--bg-dark);
 }
 
@@ -19,6 +20,7 @@
   opacity: 1;
   pointer-events: auto;
   z-index: 10;
+  transform: translateY(0) scale(1);
 }
 
 .slide-content {
@@ -197,6 +199,11 @@
   line-height: 1.1;
   text-transform: uppercase;
   letter-spacing: -0.02em;
+  animation: date-reveal 0.8s ease-out 0.2s both;
+}
+@keyframes date-reveal {
+  0% { transform: translateY(20px) scale(0.9); opacity: 0; filter: blur(10px); }
+  100% { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); }
 }
 .journey-days-text {
   margin-top: 3vh;
@@ -285,8 +292,18 @@
 
 /* PEAK SLIDE */
 .peak-display { margin-bottom: 6vh; }
-.peak-day { font-size: 15cqw; font-weight: 700; color: var(--accent-2); line-height: 1; }
-.peak-time { font-size: 6cqw; color: var(--text-grey); }
+.peak-day { 
+  font-size: 15cqw; 
+  font-weight: 700; 
+  color: var(--accent-2); 
+  line-height: 1;
+  animation: peak-reveal 0.7s ease-out;
+}
+@keyframes peak-reveal {
+  0% { transform: translateX(-20px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+.peak-time { font-size: 6cqw; color: var(--text-grey); animation: fade-in-up 0.6s ease-out 0.3s both; }
 .peak-time span { color: white; }
 .chart-placeholder { display: flex; align-items: flex-end; justify-content: center; gap: 8px; height: 20vh; opacity: 0.7; }
 .bar-wrapper { display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
@@ -416,11 +433,22 @@
   background: linear-gradient(to right, #10b981, #3b82f6);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: 1vh;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5ch;
+  animation: persona-glow 2s ease-in-out infinite, persona-reveal 0.8s ease-out;
+}
+@keyframes persona-glow {
+  0%, 100% { filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.4)); }
+  50% { filter: drop-shadow(0 0 25px rgba(59, 130, 246, 0.6)); }
+}
+@keyframes persona-reveal {
+  0% { transform: scale(0.8); opacity: 0; }
+  60% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
 }
 .persona-text { font-size: 5cqw; line-height: 1.6; color: var(--text-grey); max-width: 85%; margin-bottom: 2vh; }
 .persona-reason { font-size: 3.5cqw; line-height: 1.5; color: #666; max-width: 80%; font-style: italic; margin-top: 2vh; }
@@ -450,6 +478,13 @@
   background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: month-reveal 0.8s ease-out;
+}
+@keyframes month-reveal {
+  0% { transform: translateY(30px) scale(0.9); opacity: 0; }
+  60% { transform: translateY(-5px) scale(1.02); }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
 }
 .month-count { font-size: 6cqw; color: var(--text-grey); margin-top: 2vh; }
 .month-count span { color: white; font-weight: 700; }
@@ -469,13 +504,46 @@
   margin-bottom: 30px;
   box-shadow: 10px 10px 0px rgba(255,255,255,0.2);
   position: relative;
+  overflow: hidden;
+  animation: card-entrance 0.6s ease-out;
+}
+.summary-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  animation: shimmer 2s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+@keyframes shimmer {
+  0% { left: -100%; }
+  50%, 100% { left: 100%; }
+}
+@keyframes card-entrance {
+  0% { transform: scale(0.9) rotateX(10deg); opacity: 0; }
+  100% { transform: scale(1) rotateX(0); opacity: 1; }
 }
 .card-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #333; padding-bottom: 15px; }
 .card-logo { font-size: 5cqw; font-weight: 900; text-transform: uppercase; letter-spacing: -0.02em; line-height: 1; }
 .card-year { font-size: 6cqw; font-weight: 900; color: white; background: black; padding: 2px 8px; border: 1px solid white; }
 .card-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 0; gap: 15px; }
 .hero-stat { text-align: center; }
-.hero-val { font-size: 24cqw; font-weight: 900; line-height: 0.9; color: var(--accent-1); text-shadow: 2px 2px 0px #fff; }
+.hero-val { 
+  font-size: 24cqw; 
+  font-weight: 900; 
+  line-height: 0.9; 
+  color: var(--accent-1); 
+  text-shadow: 2px 2px 0px #fff;
+  animation: hero-pop 0.5s ease-out 0.3s both;
+}
+@keyframes hero-pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  70% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
 .hero-label { font-size: 4cqw; color: white; text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em; margin-top: 8px; background: #333; padding: 4px 10px; display: inline-block; }
 .summary-persona-badge { text-align: center; background: white; color: black; border: 2px solid white; padding: 8px 20px; border-radius: 50px; margin: 10px 0; font-weight: 700; transform: rotate(-2deg); }
 .summary-persona-badge span { font-size: 5cqw; color: black; }
@@ -490,7 +558,7 @@
 .actions-row { display: flex; gap: 10px; width: 100%; flex-direction: column; }
 
 /* ANIMATIONS & EFFECTS */
-.confetti { position: fixed; width: 10px; height: 10px; background: var(--accent-1); position: absolute; animation: confetti-fall 3s ease-out forwards; pointer-events: none; z-index: 1000; }
+.confetti { position: absolute; width: 10px; height: 10px; background: var(--accent-1); animation: confetti-fall 3s ease-out forwards; pointer-events: none; z-index: 1000; }
 @keyframes confetti-fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
 .stat-huge[data-animate], .stat-box .val[data-animate] { animation: count-up 1s ease-out; }
 @keyframes count-up { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
@@ -499,8 +567,57 @@
 @keyframes fade-in-up { to { opacity: 1; transform: translateY(0); } }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 
+/* Emoji bounce animation */
+.emoji-bounce {
+  display: inline-block;
+  animation: emoji-bounce 0.6s ease-out;
+}
+@keyframes emoji-bounce {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.3); }
+  70% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+/* Glow pulse for big stats */
+.glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+@keyframes glow-pulse {
+  0%, 100% { 
+    text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+    filter: brightness(1);
+  }
+  50% { 
+    text-shadow: 0 0 40px rgba(16, 185, 129, 0.6), 0 0 60px rgba(16, 185, 129, 0.3);
+    filter: brightness(1.1);
+  }
+}
+
+/* Number counter - hide until animated */
+.count-up-number {
+  transition: opacity 0.2s;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .fade-in-up { opacity: 1; transform: none; animation: none; }
+  .fade-in-up,
+  .emoji-bounce,
+  .glow-pulse,
+  .persona-name,
+  .month-name,
+  .summary-card,
+  .peak-day,
+  .peak-time,
+  .hero-val,
+  .journey-full-date { 
+    opacity: 1; 
+    transform: none; 
+    animation: none; 
+    filter: none;
+  }
+  .summary-card::before { animation: none; }
+  .slide { transition: opacity 0.2s ease; transform: none; }
+  .slide.active { transform: none; }
 }
 
 /* ERROR SLIDE */

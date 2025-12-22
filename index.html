@@ -32,6 +32,10 @@
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/slides.css">
+  
+  <!-- Analytics (privacy-friendly, no cookies) -->
+  <script data-goatcounter="https://gptwrapped.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="ae7f81d6-e3f4-401d-a534-a5b390b73ccb"></script>
 </head>
 <body>
   <!-- Skip to content for screen readers -->
@@ -67,8 +71,9 @@
 
           <div class="upload-box" id="drop-zone" role="button" tabindex="0" aria-label="Upload conversations file">
             <div class="upload-guide">
-              <a href="https://chatgpt.com/#settings/DataControls" target="_blank" class="guide-step"><span class="step-num">1</span> <span class="step-text">Export your data from ChatGPT</span></a>
-              <span class="guide-step guide-step-final"><span class="step-num">2</span> <span class="step-text">Upload the .zip file you receive</span></span>
+              <a href="https://chatgpt.com/#settings/DataControls" target="_blank" class="guide-step"><span class="step-num">1</span> <span class="step-text">Click Export Data on ChatGPT</span></a>
+              <a href="https://mail.google.com/mail/u/0/#advanced-search/from=noreply%40tm.openai.com&subject=ChatGPT+-+Your+data+export+is+ready&sizeoperator=s_sl&sizeunit=s_smb&query=from%3A(noreply%40tm.openai.com)" target="_blank" class="guide-step"><span class="step-num">2</span> <span class="step-text">Grab .zip from your email</span></a>
+              <span class="guide-step guide-step-final"><span class="step-num">3</span> Upload below</span>
             </div>
             
             <button id="btn-select" class="btn-main" type="button">Select .zip file</button>
@@ -78,6 +83,7 @@
           </div>
           
           <p class="privacy-line">🔒 100% private · runs in your browser</p>
+          <p class="verify-line"><a href="https://chatgpt.com/?q=Please%20audit%20the%20GitHub%20repo%20https%3A%2F%2Fgithub.com%2Fsanjeed5%2Fchatgpt-wrapped%20for%20privacy.%20Verify%20that%20user%20data%20never%20leaves%20the%20browser%20when%20uploading%20a%20ChatGPT%20export.%20Check%20for%20any%20analytics%2C%20tracking%2C%20or%20data%20exfiltration.%20Also%20explain%20how%20I%20can%20check%20the%20Network%20tab%20in%20browser%20DevTools%20to%20verify%20no%20data%20is%20being%20sent%20when%20I%20use%20the%20site." target="_blank">Ask AI to verify</a></p>
         </div>
 
         <div class="slide-footer">
@@ -245,6 +251,8 @@
     <section class="slide slide-gradient-2 slide-politeness">
       <div class="slide-content centered">
         <p class="eyebrow">Manners Audit</p>
+        <h1 class="stat-huge" data-hook="polite-count">0</h1>
+        <p class="stat-label">times you said please or thanks</p>
         <p class="stat-desc polite-desc" data-hook="polite-desc">Kindness counted.</p>
       </div>
     </section>

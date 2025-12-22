@@ -246,9 +246,28 @@ const App = {
     const curr = this.slides[this.currentSlideIndex];
     curr.classList.add('active');
     
+    // Trigger animations on slide enter
+    setTimeout(() => {
+      this.animateSlideNumbers(curr);
+      this.animateEmojis(curr);
+      this.addGlowEffect(curr);
+    }, 100);
+    
     // Trigger confetti on special slides
-    if (index === 3 && this.stats) { // First data slide
-      setTimeout(() => this.triggerConfetti(), 300);
+    if (index === 3 && this.stats) { // First data slide (journey)
+      setTimeout(() => this.triggerConfetti(50), 300);
+    }
+    
+    // Confetti on persona slide
+    const isPersonaSlide = curr.querySelector('.persona-name');
+    if (isPersonaSlide) {
+      setTimeout(() => this.triggerConfetti(40), 400);
+    }
+    
+    // Big confetti burst on summary/final slide
+    const isSummarySlide = curr.querySelector('.summary-card');
+    if (isSummarySlide) {
+      setTimeout(() => this.triggerConfetti(70), 200);
     }
     
     // Announce to screen readers
@@ -411,9 +430,9 @@ const App = {
     this.goToSlide(3);
   },
 
-  triggerConfetti() {
-    const colors = ['#10b981', '#3b82f6', '#8b5cf6', '#ffffff'];
-    for (let i = 0; i < 50; i++) {
+  triggerConfetti(count = 50) {
+    const colors = ['#10b981', '#3b82f6', '#8b5cf6', '#ffffff', '#fbbf24'];
+    for (let i = 0; i < count; i++) {
       setTimeout(() => {
         const confetti = document.createElement('div');
         confetti.className = 'confetti';
@@ -422,12 +441,85 @@ const App = {
         confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
         confetti.style.animationDelay = Math.random() * 0.5 + 's';
         confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        // Add some variety to confetti shapes
+        if (Math.random() > 0.5) {
+          confetti.style.borderRadius = '50%';
+        }
+        confetti.style.width = (Math.random() * 8 + 6) + 'px';
+        confetti.style.height = (Math.random() * 8 + 6) + 'px';
         
         const currentSlide = this.slides[this.currentSlideIndex];
         currentSlide.appendChild(confetti);
         
         setTimeout(() => confetti.remove(), 3500);
       }, i * 30);
+    }
+  },
+
+  // Animate numbers counting up
+  animateNumber(element, targetNum, duration = 1000) {
+    const startTime = performance.now();
+    const startNum = 0;
+    
+    const updateNumber = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Ease out cubic for satisfying deceleration
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+      const currentNum = Math.floor(startNum + (targetNum - startNum) * easeOut);
+      
+      element.textContent = currentNum.toLocaleString('en-US');
+      
+      if (progress < 1) {
+        requestAnimationFrame(updateNumber);
+      } else {
+        element.textContent = targetNum.toLocaleString('en-US');
+      }
+    };
+    
+    requestAnimationFrame(updateNumber);
+  },
+
+  // Animate all countable numbers in a slide
+  animateSlideNumbers(slide) {
+    // Find elements with data-count attribute or stat-huge class with numbers
+    const statElements = slide.querySelectorAll('.stat-huge, .stat-box .val, .hero-val, .mini-val');
+    
+    statElements.forEach((el, idx) => {
+      const text = el.textContent.trim();
+      // Check if it's a pure number (with possible commas)
+      const numMatch = text.replace(/,/g, '').match(/^(\d+)$/);
+      if (numMatch) {
+        const targetNum = parseInt(numMatch[1], 10);
+        if (targetNum > 0) {
+          // Stagger the animations slightly
+          setTimeout(() => {
+            this.animateNumber(el, targetNum, 800 + Math.min(targetNum, 500));
+          }, idx * 100);
+        }
+      }
+    });
+  },
+
+  // Add bounce animation to emojis
+  animateEmojis(slide) {
+    const emojiElements = slide.querySelectorAll('.persona-icon, .model-icon, .overview-icon, .error-icon');
+    emojiElements.forEach((el, idx) => {
+      el.classList.remove('emoji-bounce');
+      // Force reflow
+      void el.offsetWidth;
+      setTimeout(() => {
+        el.classList.add('emoji-bounce');
+      }, idx * 100);
+    });
+  },
+
+  // Add glow to main stat
+  addGlowEffect(slide) {
+    const mainStat = slide.querySelector('.stat-huge');
+    if (mainStat) {
+      mainStat.classList.add('glow-pulse');
     }
   }
 };

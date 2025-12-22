@@ -358,10 +358,11 @@ const SlideGenerator = {
 
     // 8. Politeness
     if (stats.politeness && stats.politeness.userMessageCount > 0) {
-      const { description } = stats.politeness;
+      const { description, count } = stats.politeness;
       const politeDesc = description || 'Kindness noticed.';
 
       createSlide('tpl-slide-politeness', {
+        'polite-count': formatNumber(count || 0),
         'polite-desc': politeDesc
       });
     }
