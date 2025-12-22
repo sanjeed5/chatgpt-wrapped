@@ -1,31 +1,22 @@
 /**
  * ChatGPT Wrapped - Data Parser
- * Handles ZIP and JSON file parsing
+ * Handles ZIP file parsing to extract conversations.json
  */
 
 const Parser = {
   /**
-   * Parse uploaded file (ZIP or JSON)
-   * @param {File} file - The uploaded file
+   * Parse uploaded ZIP file
+   * @param {File} file - The uploaded ZIP file
    * @param {Function} onStatus - Status update callback
    * @returns {Promise<Array>} - Parsed conversations array
    */
   async parse(file, onStatus = () => {}) {
     const fileName = file.name.toLowerCase();
     
-    if (fileName.endsWith('.zip')) {
-      return this.parseZip(file, onStatus);
-    } else if (fileName.endsWith('.json')) {
-      return this.parseJson(file, onStatus);
-    } else {
-      throw new Error('Unsupported file type. Please upload a .zip or .json file.');
+    if (!fileName.endsWith('.zip')) {
+      throw new Error('Please upload the .zip file from your ChatGPT export.');
     }
-  },
-
-  /**
-   * Parse ZIP file and extract conversations.json
-   */
-  async parseZip(file, onStatus) {
+    
     onStatus('Extracting ZIP file...');
     
     try {
@@ -48,7 +39,7 @@ const Parser = {
       }
       
       if (!conversationsFile) {
-        throw new Error('Could not find conversations.json in the ZIP file.');
+        throw new Error('Could not find conversations.json in the ZIP file. Make sure you uploaded the correct ChatGPT export.');
       }
       
       onStatus('Reading conversations...');
@@ -63,35 +54,10 @@ const Parser = {
       
       return conversations;
     } catch (error) {
-      if (error.message.includes('conversations.json')) {
+      if (error.message.includes('conversations.json') || error.message.includes('ChatGPT export')) {
         throw error;
       }
       throw new Error('Failed to read ZIP file. Make sure it\'s a valid ChatGPT export.');
-    }
-  },
-
-  /**
-   * Parse JSON file directly
-   */
-  async parseJson(file, onStatus) {
-    onStatus('Reading JSON file...');
-    
-    try {
-      const text = await file.text();
-      
-      onStatus('Parsing data...');
-      const conversations = JSON.parse(text);
-      
-      if (!Array.isArray(conversations)) {
-        throw new Error('Invalid JSON format. Expected an array of conversations.');
-      }
-      
-      return conversations;
-    } catch (error) {
-      if (error instanceof SyntaxError) {
-        throw new Error('Invalid JSON file. Could not parse the data.');
-      }
-      throw error;
     }
   }
 };

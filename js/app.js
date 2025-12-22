@@ -85,7 +85,10 @@ const App = {
     });
 
     // Demo
-    this.dom.btnDemo.addEventListener('click', () => this.loadDemo());
+    this.dom.btnDemo.addEventListener('click', (e) => {
+      e.preventDefault();
+      this.loadDemo();
+    });
 
     // Drag & Drop
     this.dom.dropZone.addEventListener('click', (e) => {
@@ -381,7 +384,7 @@ const App = {
     btn.textContent = 'Generating...';
     btn.disabled = true;
     
-    html2canvas(card, { backgroundColor: null }).then(canvas => {
+    html2canvas(card, { backgroundColor: '#000000' }).then(canvas => {
       const link = document.createElement('a');
       const year = this.stats?.year || new Date().getFullYear();
       link.download = `chatgpt-wrapped-${year}.png`;

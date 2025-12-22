@@ -68,12 +68,11 @@
           <div class="upload-box" id="drop-zone" role="button" tabindex="0" aria-label="Upload conversations file">
             <div class="upload-guide">
               <a href="https://chatgpt.com/#settings/DataControls" target="_blank" class="guide-step"><span class="step-num">1</span> <span class="step-text">Export your data from ChatGPT</span></a>
-              <a href="https://mail.google.com/mail/u/0/#advanced-search/from=noreply%40tm.openai.com&subject=ChatGPT+-+Your+data+export+is+ready&sizeoperator=s_sl&sizeunit=s_smb&query=from%3A(noreply%40tm.openai.com)" target="_blank" class="guide-step"><span class="step-num">2</span> <span class="step-text">Grab .zip from your email</span></a>
-              <span class="guide-step guide-step-final"><span class="step-num">3</span> Upload below</span>
+              <span class="guide-step guide-step-final"><span class="step-num">2</span> <span class="step-text">Upload the .zip file you receive</span></span>
             </div>
             
             <button id="btn-select" class="btn-main" type="button">Select .zip file</button>
-            <input type="file" id="file-input" hidden accept=".json,.zip">
+            <input type="file" id="file-input" hidden accept=".zip">
             
             <p class="demo-prompt">Just curious? <a href="#" id="btn-demo">Try with sample data</a></p>
           </div>
@@ -145,7 +144,7 @@
           <div class="stat-box">
             <span class="overview-icon">💬</span>
             <span class="val" data-hook="total-convos">0</span>
-            <span class="lbl">Conversations</span>
+            <span class="lbl">Messages</span>
           </div>
           <div class="stat-box">
             <span class="overview-icon">📅</span>
@@ -165,7 +164,7 @@
       <div class="slide-content centered">
         <p class="eyebrow">Year Over Year</p>
         <h1 class="stat-huge text-gradient" data-hook="growth-multiple">2.3x</h1>
-        <p class="stat-label" data-hook="growth-label">more than last year</p>
+        <p class="stat-label" data-hook="growth-label">more messages than last year</p>
         
         <!-- Graph Container -->
         <div class="growth-graph-container" id="growth-graph-container">
@@ -228,14 +227,16 @@
     <section class="slide slide-dark">
       <div class="slide-content centered">
         <p class="eyebrow">The Tool</p>
-        <h2 class="title-md">Your Go-To Model</h2>
+        <h2 class="title-md">Your Top Models</h2>
         
         <div class="model-display">
           <div class="model-icon">🤖</div>
-          <h1 class="stat-huge text-gradient" data-hook="top-model">GPT-4</h1>
+          <div class="model-list" data-hook="model-list">
+            <!-- Models will be injected by JS -->
+          </div>
         </div>
 
-        <p class="stat-desc">Your steady pick.</p>
+        <p class="stat-desc">Your favorites this year.</p>
       </div>
     </section>
   </template>
@@ -244,15 +245,7 @@
     <section class="slide slide-gradient-2 slide-politeness">
       <div class="slide-content centered">
         <p class="eyebrow">Manners Audit</p>
-        <h1 class="stat-huge" data-hook="polite-count">0</h1>
-        <p class="stat-label" data-hook="polite-sub">please/thanks spotted</p>
-        
-        <div class="polite-meter" aria-hidden="true">
-          <div class="polite-meter-fill" data-hook="polite-meter"></div>
-        </div>
-        
         <p class="stat-desc polite-desc" data-hook="polite-desc">Kindness counted.</p>
-        <p class="polite-footnote" data-hook="polite-footnote">Percent of your messages with manners.</p>
       </div>
     </section>
   </template>
@@ -264,7 +257,7 @@
         <p class="eyebrow">Your Archetype</p>
         <h1 class="persona-name" data-hook="persona-type">The Explorer</h1>
         <p class="persona-text" data-hook="persona-desc">You use AI when inspiration strikes. Quality over quantity.</p>
-        <!-- Reason injected via JS -->
+        <p class="persona-reason" data-hook="persona-reason"></p>
       </div>
     </section>
   </template>
@@ -291,7 +284,7 @@
         
         <div class="month-display">
           <div class="month-name" data-hook="biggest-month">March</div>
-          <div class="month-count"><span data-hook="month-count">0</span> conversations</div>
+          <div class="month-count"><span data-hook="month-count">0</span> messages</div>
         </div>
         
         <p class="stat-desc month-desc" data-hook="month-desc">That month was your hot streak.</p>
@@ -299,15 +292,6 @@
     </section>
   </template>
 
-
-  <template id="tpl-slide-roast">
-    <section class="slide slide-dark">
-      <div class="slide-content centered">
-        <p class="eyebrow">The Reality Check</p>
-        <h1 class="title-md roast-text" data-hook="roast-text">Keeping it balanced.</h1>
-      </div>
-    </section>
-  </template>
 
   <template id="tpl-slide-summary">
     <section class="slide slide-screenshot">
@@ -321,7 +305,7 @@
           <div class="card-body">
             <div class="hero-stat">
               <div class="hero-val" data-hook="total-convos">0</div>
-              <div class="hero-label">Conversations</div>
+              <div class="hero-label">Messages</div>
             </div>
             
             <div class="summary-persona-badge">
@@ -334,14 +318,16 @@
                 <span class="mini-lbl">Active Days</span>
               </div>
               <div class="mini-stat">
-                <span class="mini-val" data-hook="total-hours">0</span>
-                <span class="mini-lbl">Hours</span>
-              </div>
-              <div class="mini-stat">
                 <span class="mini-val" data-hook="words-short">0</span>
                 <span class="mini-lbl">Words</span>
               </div>
+              <div class="mini-stat">
+                <span class="mini-val" data-hook="streak-days">0</span>
+                <span class="mini-lbl">Day Streak</span>
+              </div>
             </div>
+
+            <p class="summary-manners" data-hook="manners-text">You said please/thanks <span data-hook="manners-count">0</span> times <span data-hook="manners-icon">😇</span></p>
           </div>
           
           <div class="card-footer">gptwrapped.sanjeed.in</div>

@@ -288,9 +288,11 @@
 .peak-day { font-size: 15cqw; font-weight: 700; color: var(--accent-2); line-height: 1; }
 .peak-time { font-size: 6cqw; color: var(--text-grey); }
 .peak-time span { color: white; }
-.chart-placeholder { display: flex; align-items: flex-end; gap: 8px; height: 20vh; opacity: 0.7; }
-.bar { width: 15px; background: #333; border-radius: 4px; }
+.chart-placeholder { display: flex; align-items: flex-end; justify-content: center; gap: 8px; height: 20vh; opacity: 0.7; }
+.bar-wrapper { display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+.bar { width: 15px; background: #333; border-radius: 4px; min-height: 10px; }
 .bar.active { background: var(--accent-2); box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
+.bar-day-label { font-size: 2.5cqw; color: var(--text-grey); text-transform: uppercase; }
 
 /* STREAK SLIDE - Split horizontal heatmap (2 rows of 6 months) */
 .streak-heatmap-container {
@@ -364,8 +366,47 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1vh;
+  gap: 2vh;
   margin-bottom: 2vh;
+}
+
+.model-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.model-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.1);
+  gap: 16px;
+}
+
+.model-item.primary {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.model-name {
+  font-size: 6cqw;
+  font-weight: 700;
+  color: var(--text-white);
+}
+
+.model-item.primary .model-name {
+  color: var(--accent-1);
+}
+
+.model-count {
+  font-size: 3.5cqw;
+  color: var(--text-grey);
 }
 
 .persona-icon { font-size: 15cqw; margin-bottom: 3vh; }
@@ -381,15 +422,8 @@
   justify-content: center;
   gap: 0.5ch;
 }
-.persona-text { font-size: 5cqw; line-height: 1.6; color: var(--text-grey); max-width: 85%; margin-bottom: 4vh; }
-.persona-reason, .roast-reason {
-  font-size: 3.5cqw;
-  color: #666;
-  font-style: italic;
-  margin-top: 1vh;
-  max-width: 90%;
-  line-height: 1.4;
-}
+.persona-text { font-size: 5cqw; line-height: 1.6; color: var(--text-grey); max-width: 85%; margin-bottom: 2vh; }
+.persona-reason { font-size: 3.5cqw; line-height: 1.5; color: #666; max-width: 80%; font-style: italic; margin-top: 2vh; }
 .model-icon { font-size: 15cqw; margin-bottom: 3vh; }
 
 /* WORDS SLIDE */
@@ -421,9 +455,6 @@
 .month-count span { color: white; font-weight: 700; }
 .month-desc { margin-top: 5vh; }
 
-/* ROAST */
-.roast-text { font-size: 7cqw; line-height: 1.5; max-width: 90%; }
-
 /* SUMMARY CARD */
 .summary-card {
   width: 100%;
@@ -452,6 +483,8 @@
 .mini-stat { text-align: center; border: 1px solid #333; padding: 10px 5px; background: #111; }
 .mini-val { display: block; font-size: 6cqw; font-weight: 700; color: white; }
 .mini-lbl { display: block; font-size: 2.5cqw; color: #999; text-transform: uppercase; margin-top: 4px; }
+.summary-manners { font-size: 3.5cqw; color: #999; font-style: italic; margin-top: 10px; }
+.summary-manners span[data-hook="manners-count"] { color: var(--accent-1); font-weight: 700; font-style: normal; }
 .card-footer { text-align: right; font-size: 3cqw; color: #555; font-family: var(--font-mono); padding-top: 15px; border-top: 2px solid #333; }
 .share-prompt { font-size: 4cqw; color: var(--text-grey); font-family: var(--font-serif); font-style: italic; margin-bottom: 15px; text-align: center; }
 .actions-row { display: flex; gap: 10px; width: 100%; flex-direction: column; }

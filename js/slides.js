@@ -70,21 +70,20 @@ const SlideGenerator = {
     
     // 2. Intro (year overview)
     let introDesc = "ChatGPT became part of your routine.";
-    if (stats.conversations < 10) introDesc = "A few curious check-ins.";
-    else if (stats.conversations < 50) introDesc = "You stopped by when you needed a nudge.";
+    if (stats.userMessages < 100) introDesc = "A few curious check-ins.";
+    else if (stats.userMessages < 500) introDesc = "You stopped by when you needed a nudge.";
     else if (stats.activeDays >= 250) introDesc = "Practically every day.";
-    else if (stats.totalHours >= 120) introDesc = "This was a full-on collaboration.";
-    else if (stats.conversations >= 500) introDesc = "This became your go-to sidekick.";
+    else if (stats.userMessages >= 5000) introDesc = "This was a full-on collaboration.";
+    else if (stats.userMessages >= 3000) introDesc = "This became your go-to sidekick.";
     else if (stats.activeDays >= 150) introDesc = "A steady weekly rhythm.";
-    else if (stats.totalHours >= 50) introDesc = "Plenty of hours together.";
+    else if (stats.userMessages >= 1000) introDesc = "Plenty of conversations together.";
 
-    const introSub = `In ${stats.year}, you logged ${formatNumber(stats.conversations)} chats across ${formatNumber(stats.activeDays)} days.`;
+    const introSub = `In ${stats.year}, you sent ${formatNumber(stats.userMessages)} messages across ${formatNumber(stats.activeDays)} days.`;
 
     const introSlide = createSlide('tpl-slide-intro', {
       year: stats.year,
-      'total-convos': stats.conversations,
+      'total-convos': stats.userMessages,
       'active-days': stats.activeDays,
-      'total-hours': stats.totalHours,
       'intro-desc': introDesc,
       'intro-sub': introSub
     });
@@ -99,24 +98,24 @@ const SlideGenerator = {
     }
 
     // 3. YoY Growth
-    if (stats.yoyGrowth && stats.previousYearConversations > 0) {
-      const growthMultiple = stats.yoyGrowth >= 1 
-        ? `${stats.yoyGrowth.toFixed(1)}x`
-        : `${Math.round(stats.yoyGrowth * 100)}%`;
+    if (stats.yoyMessageGrowth && stats.previousYearUserMessages > 0) {
+      const growthMultiple = stats.yoyMessageGrowth >= 1 
+        ? `${stats.yoyMessageGrowth.toFixed(1)}x`
+        : `${Math.round(stats.yoyMessageGrowth * 100)}%`;
       
       let message = "Steady compared to last year.";
-      if (stats.yoyGrowth >= 3) message = "Huge jump from last year.";
-      else if (stats.yoyGrowth >= 2) message = "You leaned on it a lot more.";
-      else if (stats.yoyGrowth >= 1.5) message = "You reached for it more often.";
-      else if (stats.yoyGrowth < 1) message = 'A lighter year—still showed up.';
+      if (stats.yoyMessageGrowth >= 3) message = "Huge jump from last year.";
+      else if (stats.yoyMessageGrowth >= 2) message = "You leaned on it a lot more.";
+      else if (stats.yoyMessageGrowth >= 1.5) message = "You reached for it more often.";
+      else if (stats.yoyMessageGrowth < 1) message = 'A lighter year—still showed up.';
       
-      const growthLabel = stats.yoyGrowth >= 1 ? "more than last year" : "of last year's volume";
+      const growthLabel = stats.yoyMessageGrowth >= 1 ? "more messages than last year" : "of last year's messages";
 
       const growthSlide = createSlide('tpl-slide-growth', {
         'growth-multiple': growthMultiple,
         'growth-label': growthLabel,
-        'this-year': stats.conversations,
-        'last-year': stats.previousYearConversations,
+        'this-year': stats.userMessages,
+        'last-year': stats.previousYearUserMessages,
         'current-year-label': stats.year,
         'previous-year-label': stats.year - 1,
         'growth-message': message
@@ -125,8 +124,8 @@ const SlideGenerator = {
       if (growthSlide) {
           const graphContainer = growthSlide.querySelector('.growth-graph-container');
           if (graphContainer) {
-            const y1 = stats.previousYearConversations;
-            const y2 = stats.conversations;
+            const y1 = stats.previousYearUserMessages;
+            const y2 = stats.userMessages;
             const max = Math.max(y1, y2);
             const h1 = max > 0 ? (y1 / max) * 100 : 0;
             const h2 = max > 0 ? (y2 / max) * 100 : 0;
@@ -266,7 +265,7 @@ const SlideGenerator = {
                   } else if (isFuture) {
                     cell.classList.add('future');
                   } else if (count > 0) {
-                    const intensity = Math.ceil((count / maxCount) * 4);
+                    const intensity = maxCount > 0 ? Math.ceil((count / maxCount) * 4) : 1;
                     cell.classList.add(`level-${Math.min(intensity, 4)}`);
                     if (inStreak) {
                       cell.classList.add('streak');
@@ -299,49 +298,72 @@ const SlideGenerator = {
           chartContainer.setAttribute('aria-label', `Bar chart showing weekly activity. Most active on ${stats.peakDay}.`);
           
           const days = ['Sundays', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays'];
+          const dayAbbrevs = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
           const counts = days.map(day => stats.peakDayDistribution[day] || 0);
           const maxCount = Math.max(...counts);
           
           days.forEach((day, idx) => {
+            const barWrapper = document.createElement('div');
+            barWrapper.className = 'bar-wrapper';
+            
             const bar = document.createElement('div');
             bar.className = 'bar';
             if (day === stats.peakDay) bar.classList.add('active');
             const height = maxCount > 0 ? (counts[idx] / maxCount) * 100 : 0;
             bar.style.height = `${height}%`;
             bar.title = `${day}: ${counts[idx]} conversations`;
-            chartContainer.appendChild(bar);
+            
+            const label = document.createElement('span');
+            label.className = 'bar-day-label';
+            label.textContent = dayAbbrevs[idx];
+            
+            barWrapper.appendChild(bar);
+            barWrapper.appendChild(label);
+            chartContainer.appendChild(barWrapper);
           });
       }
     }
 
     // 7. Model
-    if (stats.topModel) {
-      createSlide('tpl-slide-model', {
-        'top-model': stats.topModel
-      });
+    if (stats.topModels && stats.topModels.length > 0) {
+      const tpl = document.getElementById('tpl-slide-model');
+      if (tpl) {
+        const clone = tpl.content.cloneNode(true);
+        const slide = clone.querySelector('.slide');
+        const modelList = slide.querySelector('[data-hook="model-list"]');
+        
+        if (modelList) {
+          stats.topModels.forEach((modelData, idx) => {
+            const modelItem = document.createElement('div');
+            modelItem.className = 'model-item';
+            if (idx === 0) modelItem.classList.add('primary');
+            
+            const modelName = document.createElement('div');
+            modelName.className = 'model-name';
+            modelName.textContent = modelData.model;
+            
+            const modelCount = document.createElement('div');
+            modelCount.className = 'model-count';
+            modelCount.textContent = `${modelData.count} message${modelData.count === 1 ? '' : 's'}`;
+            
+            modelItem.appendChild(modelName);
+            modelItem.appendChild(modelCount);
+            modelList.appendChild(modelItem);
+          });
+        }
+        
+        container.appendChild(slide);
+      }
     }
 
     // 8. Politeness
     if (stats.politeness && stats.politeness.userMessageCount > 0) {
-      const { count, percentage, description } = stats.politeness;
-      const politeSub = count === 1 ? 'please/thanks spotted' : 'pleases & thanks spotted';
+      const { description } = stats.politeness;
       const politeDesc = description || 'Kindness noticed.';
-      const meterPercent = Math.min(100, Math.max(0, percentage));
 
-      const politenessSlide = createSlide('tpl-slide-politeness', {
-        'polite-count': count.toLocaleString('en-US'),
-        'polite-sub': politeSub,
-        'polite-desc': politeDesc,
-        'polite-footnote': `${percentage}% of your messages`
+      createSlide('tpl-slide-politeness', {
+        'polite-desc': politeDesc
       });
-
-      if (politenessSlide) {
-        const meter = politenessSlide.querySelector('[data-hook="polite-meter"]');
-        if (meter) {
-          meter.style.width = `${Math.max(6, meterPercent)}%`;
-          meter.setAttribute('aria-label', `Politeness percentile: ${percentage}% of your messages included please/thanks.`);
-        }
-      }
     }
 
     // 8. Persona
@@ -349,7 +371,8 @@ const SlideGenerator = {
 
     const personaData = {
       'persona-type': personaTitle || stats.personality.archetype,
-      'persona-desc': stats.personality.description
+      'persona-desc': stats.personality.description,
+      'persona-reason': stats.personality.reason || ''
     };
     
     if (stats.personality.emoji) {
@@ -359,14 +382,6 @@ const SlideGenerator = {
     const personaSlide = createSlide('tpl-slide-persona', personaData);
     
     if (personaSlide) {
-        const descriptionEl = personaSlide.querySelector('.persona-text');
-        if (descriptionEl && stats.personality.reason) {
-           const sub = document.createElement('div');
-           sub.className = 'persona-reason';
-           sub.textContent = stats.personality.reason;
-           descriptionEl.parentNode.insertBefore(sub, descriptionEl.nextSibling);
-        }
-
         const emojiEl = personaSlide.querySelector('.persona-icon');
         if (emojiEl) {
           emojiEl.setAttribute('role', 'img');
@@ -405,31 +420,20 @@ const SlideGenerator = {
         container.appendChild(slide);
     }
 
-    // 10. Roast
-    const roastSlide = createSlide('tpl-slide-roast', {
-      'roast-text': stats.roast.text
-    });
-    
-    if (roastSlide) {
-        const roastTitle = roastSlide.querySelector('.roast-text');
-        if (roastTitle && stats.roast.reason) {
-          const sub = document.createElement('p');
-          sub.className = 'roast-reason';
-          sub.textContent = `(${stats.roast.reason})`;
-          roastTitle.parentNode.appendChild(sub);
-        }
-    }
-
-    // 11. Summary
+    // 10. Summary
     const summaryPersonaRaw = stats.personality.archetype || stats.personality.type || '';
     const summaryPersona = summaryPersonaRaw.replace(/^[^\w]+\s*/, '').trim();
+    const mannersCount = stats.politeness?.count || 0;
+    const mannersIcon = stats.politeness?.icon || '😇';
     const summarySlide = createSlide('tpl-slide-summary', {
       year: stats.year,
-      'total-convos': stats.conversations,
+      'total-convos': stats.userMessages,
       'active-days': stats.activeDays,
-      'total-hours': stats.totalHours,
       'words-short': stats.wordsTypedFormatted,
-      'persona-type': summaryPersona
+      'streak-days': stats.longestStreak || 0,
+      'persona-type': summaryPersona,
+      'manners-count': mannersCount.toLocaleString('en-US'),
+      'manners-icon': mannersIcon
     });
 
     return { summarySlide }; // Return for app to hook events if needed
